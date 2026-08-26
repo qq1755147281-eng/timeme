@@ -1,0 +1,3004 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>时间锚定</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=Noto+Serif+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    color: #f5f0ff;
+    -webkit-font-smoothing: antialiased;
+    font-family: "Noto Serif SC", "Cormorant Garamond", serif;
+  }
+
+  body {
+    min-height: 100vh;
+    background: #0a1a4a;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* 背景渐变层：蓝 → 紫 */
+  .bg-gradient {
+    position: fixed; inset: 0; z-index: -3;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(86, 124, 255, 0.55) 0%, transparent 45%),
+      radial-gradient(ellipse at 85% 90%, rgba(168, 85, 255, 0.55) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(72, 52, 178, 0.35) 0%, transparent 70%),
+      linear-gradient(135deg, #0a1f5c 0%, #2a1a8c 45%, #5b2a9e 75%, #7c3aed 100%);
+  }
+
+  .glow {
+    position: fixed; border-radius: 50%; filter: blur(80px);
+    opacity: 0.55; z-index: -2; pointer-events: none;
+    animation: float 18s ease-in-out infinite;
+  }
+  .glow.g1 { width: 520px; height: 520px; background: radial-gradient(circle, #4f6bff 0%, transparent 70%); top: -120px; left: -80px; }
+  .glow.g2 { width: 600px; height: 600px; background: radial-gradient(circle, #b14dff 0%, transparent 70%); bottom: -180px; right: -120px; animation-delay: -6s; }
+  .glow.g3 { width: 360px; height: 360px; background: radial-gradient(circle, #6a5cff 0%, transparent 70%); top: 40%; left: 55%; animation-delay: -12s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33% { transform: translate(40px,-30px) scale(1.08); }
+    66% { transform: translate(-30px,40px) scale(0.95); }
+  }
+
+  .noise {
+    position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/></svg>");
+  }
+
+  /* 主区域 */
+  .stage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(20px, 3vh, 40px) 24px 12px;
+    gap: clamp(14px, 2.6vh, 24px);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  /* ============ 阳历时间区（紫绿发光方框） ============ */
+  .solar {
+    position: relative;
+    width: min(460px, 90vw);
+    padding: 14px 32px 16px;
+    border: 1px solid rgba(120, 255, 170, 0.55);
+    border-radius: 2px;
+    background: transparent;
+    box-shadow:
+      0 0 40px rgba(80, 230, 160, 0.32),
+      0 0 90px rgba(80, 230, 160, 0.18),
+      inset 0 0 30px rgba(120, 255, 170, 0.06);
+    animation: greenPulse 5s ease-in-out infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @keyframes greenPulse {
+    0%, 100% {
+      box-shadow:
+        0 0 40px rgba(80, 230, 160, 0.32),
+        0 0 90px rgba(80, 230, 160, 0.18),
+        inset 0 0 30px rgba(120, 255, 170, 0.06);
+    }
+    50% {
+      box-shadow:
+        0 0 64px rgba(80, 230, 160, 0.50),
+        0 0 130px rgba(80, 230, 160, 0.28),
+        inset 0 0 42px rgba(120, 255, 170, 0.12);
+    }
+  }
+
+  /* 绿色角部装饰 */
+  .solar .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    pointer-events: none;
+  }
+  .solar .corner.tl { top: -1px; left: -1px; border-top: 1px solid rgba(150, 255, 180, 0.95); border-left: 1px solid rgba(150, 255, 180, 0.95); }
+  .solar .corner.tr { top: -1px; right: -1px; border-top: 1px solid rgba(150, 255, 180, 0.95); border-right: 1px solid rgba(150, 255, 180, 0.95); }
+  .solar .corner.bl { bottom: -1px; left: -1px; border-bottom: 1px solid rgba(150, 255, 180, 0.95); border-left: 1px solid rgba(150, 255, 180, 0.95); }
+  .solar .corner.br { bottom: -1px; right: -1px; border-bottom: 1px solid rgba(150, 255, 180, 0.95); border-right: 1px solid rgba(150, 255, 180, 0.95); }
+
+  .solar-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 2px;
+  }
+
+  .solar-head .label {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.42em;
+    color: #ffffff;
+    padding-left: 0.42em;
+    text-shadow: 0 0 16px rgba(120, 255, 180, 0.85), 0 0 32px rgba(80, 230, 160, 0.5);
+  }
+
+  .solar-head .line {
+    flex: 0 0 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(150, 255, 180, 0.85), transparent);
+    box-shadow: 0 0 8px rgba(80, 230, 160, 0.7);
+  }
+
+  .solar-head .tag {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    color: #ffffff;
+    padding-left: 0.32em;
+    text-shadow: 0 0 14px rgba(120, 255, 180, 0.85), 0 0 28px rgba(80, 230, 160, 0.5);
+  }
+
+  .solar .time {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 900;
+    font-size: clamp(46px, 9vw, 112px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+    color: #ffffff;
+    text-shadow:
+      0 0 18px rgba(120, 255, 180, 0.6),
+      0 0 40px rgba(80, 230, 160, 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .solar .date {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(20px, 2.4vw, 26px);
+    letter-spacing: 0.18em;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+    padding-left: 0.18em;
+    text-shadow: 0 0 12px rgba(120, 255, 180, 0.5);
+  }
+
+  .solar .date .unit {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 4px;
+    text-shadow: 0 0 12px rgba(120, 255, 180, 0.5);
+  }
+
+  /* ============ 雷电金钟 ============ */
+  .clock-wrap {
+    width: clamp(220px, 32vw, 380px);
+    height: clamp(220px, 32vw, 380px);
+    position: relative;
+    flex-shrink: 0;
+    margin: 8px 0;
+  }
+
+  /* 外围双圆环容器 */
+  .clock-orbit-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: clamp(240px, 38vw, 440px);
+    height: clamp(240px, 38vw, 440px);
+    margin: 8px 0;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .orbit-ring .orbit-dots {
+    transform-origin: 0 0;
+  }
+
+  /* 48点圆环样式 */
+  .orbit-ring circle.dot {
+    fill: #ffd966;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 130, 0.9));
+  }
+
+  .orbit-ring .dot.major {
+    fill: #ffe9a8;
+    filter: drop-shadow(0 0 5px rgba(255, 230, 160, 1));
+  }
+
+  /* 顺时针旋转（外环） */
+  .orbit-cw .orbit-dots {
+    animation: orbitRotateCW 60s linear infinite;
+  }
+  @keyframes orbitRotateCW {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* 逆时针旋转（内环） */
+  .orbit-ccw .orbit-dots {
+    animation: orbitRotateCCW 48s linear infinite;
+  }
+  @keyframes orbitRotateCCW {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+  }
+
+  /* 外环略大，内环略小 */
+  .orbit-cw { width: 100%; height: 100%; }
+  .orbit-ccw { width: 86%; height: 86%; }
+  .orbit-outer-ccw { width: 116%; height: 116%; }
+
+  /* 最外环：66点 逆时针 */
+  .orbit-outer-ccw .orbit-dots {
+    animation: orbitRotateCCW 72s linear infinite;
+  }
+
+  /* 内环闪烁 */
+  .orbit-ccw circle.dot {
+    animation: dotBlink 2.4s ease-in-out infinite;
+  }
+  .orbit-ccw circle.dot.major {
+    animation: dotBlinkMajor 2.4s ease-in-out infinite;
+  }
+
+  /* 圆环文字 */
+  .orbit-ring .orbit-label {
+    fill: #ffe9a8;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 130, 0.9)) drop-shadow(0 0 10px rgba(255, 195, 80, 0.6));
+  }
+  @keyframes dotBlink {
+    0%, 100% {
+      opacity: 0.4;
+      filter: drop-shadow(0 0 2px rgba(255, 215, 130, 0.6));
+    }
+    50% {
+      opacity: 1;
+      filter: drop-shadow(0 0 6px rgba(255, 230, 160, 1)) drop-shadow(0 0 12px rgba(255, 200, 80, 0.7));
+    }
+  }
+  @keyframes dotBlinkMajor {
+    0%, 100% {
+      opacity: 0.5;
+      filter: drop-shadow(0 0 3px rgba(255, 215, 130, 0.7));
+    }
+    50% {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px rgba(255, 230, 160, 1)) drop-shadow(0 0 16px rgba(255, 200, 80, 0.8));
+    }
+  }
+
+  .clock-wrap::before,
+  .clock-wrap::after {
+    content: "";
+    position: absolute;
+    inset: -14%;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .clock-wrap::before {
+    background: radial-gradient(circle, rgba(255, 195, 80, 0.28) 0%, transparent 65%);
+    animation: clockGlow 3s ease-in-out infinite;
+  }
+  .clock-wrap::after {
+    inset: -28%;
+    background: radial-gradient(circle, rgba(255, 170, 40, 0.14) 0%, transparent 70%);
+    animation: clockGlow 3s ease-in-out infinite reverse;
+  }
+
+  @keyframes clockGlow {
+    0%, 100% { opacity: 0.55; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.06); }
+  }
+
+  .clock {
+    width: 100%;
+    height: 100%;
+    display: block;
+    overflow: visible;
+  }
+
+  .clock .ring-outer,
+  .clock .ring-inner {
+    fill: none;
+    stroke: #ffd966;
+    filter: url(#goldLightning);
+  }
+  .clock .ring-outer { stroke-width: 1.6; }
+  .clock .ring-inner {
+    stroke-width: 0.6;
+    stroke: rgba(255, 215, 130, 0.55);
+  }
+
+  .clock .tick {
+    stroke: #ffd966;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+    filter: url(#goldLightning);
+  }
+  .clock .tick.minor {
+    stroke-width: 0.6;
+    stroke: rgba(255, 215, 130, 0.5);
+  }
+
+  .numerals {
+    transition: opacity 0.7s ease;
+  }
+  .numerals.arabic { opacity: 1; }
+  .numerals.chinese { opacity: 0; }
+  .clock-wrap.is-chinese .numerals.arabic { opacity: 0; }
+  .clock-wrap.is-chinese .numerals.chinese { opacity: 1; }
+
+  .numerals text {
+    font-family: "Cormorant Garamond", serif;
+    font-weight: 500;
+    fill: #ffe9a8;
+    text-anchor: middle;
+    dominant-baseline: central;
+    filter: url(#goldLightning);
+  }
+  .numerals.chinese text {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 500;
+  }
+
+  .hand {
+    transform-origin: 0 0;
+    transition: transform 0.18s cubic-bezier(0.4, 2.2, 0.5, 1);
+  }
+  .hand.second {
+    transition: transform 0.12s cubic-bezier(0.4, 2.4, 0.5, 1);
+  }
+
+  .hand path {
+    fill: #ffd966;
+    filter: url(#goldLightning);
+  }
+
+  .clock .center-dot {
+    fill: #ffe9a8;
+    stroke: #ffd966;
+    stroke-width: 1;
+    filter: url(#goldLightning);
+  }
+
+  /* 电弧装饰 */
+  .arc {
+    fill: none;
+    stroke: rgba(255, 215, 130, 0.5);
+    stroke-width: 0.6;
+    stroke-dasharray: 3 6;
+    filter: url(#goldLightning);
+    animation: arcSpin 30s linear infinite;
+    transform-origin: center;
+  }
+  @keyframes arcSpin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ============ 农历面板（金色发光边框） ============ */
+  .lunar-panel {
+    position: relative;
+    width: min(460px, 90vw);
+    padding: 14px 32px 16px;
+    border: 1px solid rgba(255, 215, 130, 0.6);
+    border-radius: 2px;
+    background: transparent;
+    box-shadow:
+      0 0 40px rgba(255, 195, 80, 0.32),
+      0 0 90px rgba(255, 195, 80, 0.18),
+      inset 0 0 30px rgba(255, 215, 130, 0.06);
+    animation: goldPulse 4.5s ease-in-out infinite;
+  }
+
+  @keyframes goldPulse {
+    0%, 100% {
+      box-shadow:
+        0 0 40px rgba(255, 195, 80, 0.32),
+        0 0 90px rgba(255, 195, 80, 0.18),
+        inset 0 0 30px rgba(255, 215, 130, 0.06);
+    }
+    50% {
+      box-shadow:
+        0 0 64px rgba(255, 195, 80, 0.50),
+        0 0 130px rgba(255, 195, 80, 0.28),
+        inset 0 0 42px rgba(255, 215, 130, 0.12);
+    }
+  }
+
+  /* 角部金线装饰 */
+  .corner {
+    position: absolute;
+    width: 14px; height: 14px;
+    border: 1px solid rgba(255, 215, 130, 0.95);
+    pointer-events: none;
+  }
+  .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+  .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+  .lunar-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+
+  .lunar-head .label {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: #ffe9a8;
+    padding-left: 0.42em;
+    text-shadow: 0 0 16px rgba(255, 195, 80, 0.85), 0 0 32px rgba(255, 195, 80, 0.5);
+  }
+
+  .lunar-head .line {
+    flex: 0 0 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 130, 0.85), transparent);
+    box-shadow: 0 0 8px rgba(255, 195, 80, 0.7);
+  }
+
+  .lunar-head .tag {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    color: #ffe9a8;
+    padding-left: 0.32em;
+    text-shadow: 0 0 14px rgba(255, 195, 80, 0.85), 0 0 28px rgba(255, 195, 80, 0.5);
+  }
+
+  .lunar-time {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(24px, 4.2vw, 34px);
+    letter-spacing: 0.18em;
+    text-align: center;
+    color: #fff3c4;
+    text-shadow:
+      0 0 18px rgba(255, 215, 130, 0.95),
+      0 0 36px rgba(255, 195, 80, 0.7),
+      0 0 60px rgba(255, 195, 80, 0.4);
+    padding-left: 0.18em;
+    margin-bottom: 6px;
+  }
+
+  .lunar-date {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(17px, 2.2vw, 21px);
+    letter-spacing: 0.18em;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: baseline;
+    color: #ffe9a8;
+    text-shadow:
+      0 0 14px rgba(255, 215, 130, 0.9),
+      0 0 28px rgba(255, 195, 80, 0.55);
+  }
+
+  .lunar-date .col {
+    text-align: center;
+  }
+
+  .lunar-date .unit {
+    font-size: 0.85em;
+    font-weight: 700;
+    color: #ffd966;
+    margin-left: 2px;
+    text-shadow: 0 0 12px rgba(255, 195, 80, 0.8);
+  }
+
+  /* 农历汉字日期（大写） */
+  .lunar-date-cn {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 215, 130, 0.2);
+    font-family: "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(16px, 2vw, 20px);
+    letter-spacing: 0.18em;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: baseline;
+    color: #fff3c4;
+    text-shadow:
+      0 0 14px rgba(255, 215, 130, 0.9),
+      0 0 28px rgba(255, 195, 80, 0.55);
+  }
+
+  .lunar-date-cn .col {
+    text-align: center;
+  }
+
+  .lunar-date-cn .month-prefix {
+    font-size: 0.82em;
+    color: #ffd966;
+    margin-right: 2px;
+    text-shadow: 0 0 12px rgba(255, 195, 80, 0.8);
+  }
+
+  .lunar-date-cn .unit {
+    font-size: 0.85em;
+    color: #ffd966;
+    margin-left: 2px;
+    text-shadow: 0 0 12px rgba(255, 195, 80, 0.8);
+  }
+
+  /* ============ 底部按钮 ============ */
+  .dock {
+    position: relative;
+    padding: 22px 24px calc(22px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    z-index: 2;
+  }
+
+  .dock::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(10, 10, 40, 0.55) 0%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .anchor-btn {
+    position: relative;
+    flex: 1 1 0;
+    max-width: 220px;
+    min-height: 88px;
+    padding: 18px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    color: #f5f0ff;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.2,0.8,0.2,1),
+                border-color 0.4s ease,
+                background 0.4s ease,
+                box-shadow 0.4s ease;
+  }
+
+  .anchor-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at var(--mx,50%) var(--my,50%),
+                rgba(255,255,255,0.18) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+  }
+
+  .anchor-btn::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #c9a4ff, transparent);
+    transform: scaleX(0);
+    transition: transform 0.5s cubic-bezier(0.2,0.8,0.2,1);
+  }
+
+  .anchor-btn:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255,255,255,0.45);
+    background: rgba(255,255,255,0.1);
+    box-shadow: 0 18px 50px -12px rgba(120,80,255,0.55),
+                0 0 0 1px rgba(255,255,255,0.05) inset;
+  }
+  .anchor-btn:hover::before { opacity: 1; }
+  .anchor-btn:hover::after  { transform: scaleX(1); }
+  .anchor-btn:active { transform: translateY(-2px) scale(0.99); transition-duration: 0.12s; }
+
+  .anchor-btn.is-active {
+    border-color: rgba(255, 215, 130, 0.7);
+    background: rgba(255, 200, 80, 0.08);
+    box-shadow: 0 0 30px rgba(255, 195, 80, 0.3),
+                inset 0 0 20px rgba(255, 195, 80, 0.05);
+  }
+  .anchor-btn.is-active::after {
+    transform: scaleX(1);
+    background: linear-gradient(90deg, transparent, #ffd966, transparent);
+  }
+
+  .btn-inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 100%;
+  }
+
+  .btn-icon {
+    width: 26px; height: 26px;
+    color: #e6d9ff;
+    transition: color 0.4s ease, transform 0.4s ease;
+  }
+  .anchor-btn:hover .btn-icon { color: #fff; transform: translateY(-1px); }
+  .anchor-btn.is-active .btn-icon { color: #ffd966; }
+
+  .btn-label {
+    font-family: "Noto Serif SC", serif;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    color: #f3ecff;
+  }
+  .anchor-btn.is-active .btn-label { color: #ffe9a8; }
+
+  .btn-sub {
+    font-family: "Cormorant Garamond", serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(220,210,255,0.55);
+  }
+
+  /* 小屏适配 */
+  @media (max-width: 520px) {
+    .dock { gap: 10px; padding: 18px 16px; }
+    .anchor-btn { min-height: 74px; padding: 12px 8px; border-radius: 14px; }
+    .btn-label { font-size: 13px; letter-spacing: 0.14em; }
+    .btn-sub { font-size: 10px; }
+    .btn-icon { width: 22px; height: 22px; }
+    .stage { padding: 14px 12px 10px; gap: 12px; }
+    .lunar-panel { padding: 18px 18px 20px; }
+    .clock-wrap { width: clamp(180px, 48vw, 260px); height: clamp(180px, 48vw, 260px); margin: 4px 0; }
+    .clock-orbit-wrap { width: clamp(200px, 54vw, 300px); height: clamp(200px, 54vw, 300px); margin: 4px 0; }
+    .solar-head .label, .solar-head .tag { font-size: 11px; }
+    .lunar-time { font-size: clamp(18px, 4.5vw, 24px); }
+  }
+
+  @media (max-height: 760px) {
+    .solar .time { font-size: clamp(34px, 6.5vw, 78px); }
+    .stage { padding: 10px 16px 8px; gap: 10px; }
+    .lunar-panel { padding: 16px 24px 18px; }
+    .solar { padding: 16px 24px 18px; }
+    .clock-wrap { width: clamp(160px, 26vw, 280px); height: clamp(160px, 26vw, 280px); margin: 4px 0; }
+    .clock-orbit-wrap { width: clamp(180px, 30vw, 320px); height: clamp(180px, 30vw, 320px); margin: 4px 0; }
+    .lunar-head { margin-bottom: 10px; }
+    .solar { gap: 8px; }
+  }
+
+  @media (max-height: 620px) {
+    .solar .time { font-size: clamp(28px, 5vw, 58px); }
+    .solar .date { font-size: 16px; }
+    .solar { padding: 12px 20px 14px; }
+    .clock-wrap { width: 150px; height: 150px; margin: 2px 0; }
+    .lunar-time { font-size: 16px; }
+    .lunar-date { font-size: 13px; }
+  }
+
+  /* ============ 闪电层 ============ */
+  .lightning-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    overflow: visible;
+  }
+  .lightning-layer path,
+  .lightning-layer polyline {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor);
+    animation: lightningFade 0.5s ease-out forwards;
+  }
+  @keyframes lightningFade {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    30% { opacity: 0.3; }
+    45% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* 中心呼吸灯 */
+  .mini-center-breath {
+    animation: centerBreath 2.2s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes centerBreath {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.4); }
+  }
+  .mini-center-core {
+    animation: centerCoreGlow 2.2s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes centerCoreGlow {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+  }
+
+  /* ============ 生日锚定页面 ============ */
+  .stage-birthday, .stage-festival {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .birthday-card, .festival-card {
+    position: relative;
+    padding: 40px 48px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    max-width: 90vw;
+  }
+
+  .birthday-head .label, .festival-head .label {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(14px, 2vw, 17px);
+    letter-spacing: 0.36em;
+    color: #ffe9a8;
+    padding-left: 0.36em;
+    text-shadow: 0 0 16px rgba(255, 215, 130, 0.9), 0 0 32px rgba(255, 195, 80, 0.5);
+  }
+
+  /* 小钟表 */
+  .mini-clock-wrap {
+    width: clamp(220px, 36vw, 340px);
+    height: clamp(220px, 36vw, 340px);
+    margin: 8px 0 4px;
+    animation: miniClockFloat 6s ease-in-out infinite;
+  }
+
+  .mini-clock {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 130, 0.4));
+  }
+
+  @keyframes miniClockFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .mini-clock text {
+    fill: #ffd966;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    text-anchor: middle;
+    dominant-baseline: central;
+    filter: url(#miniGlow);
+  }
+
+  .mini-clock .tick {
+    stroke: #ffd966;
+    stroke-width: 2;
+    opacity: 0.85;
+  }
+  .mini-clock .tick.minor {
+    stroke-width: 1;
+    opacity: 0.5;
+  }
+
+  .birthday-label {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(22px, 3.5vw, 30px);
+    letter-spacing: 0.18em;
+    color: #ffe9a8;
+    padding-left: 0.18em;
+    text-shadow: 0 0 18px rgba(255, 215, 130, 0.9), 0 0 36px rgba(255, 195, 80, 0.5);
+  }
+
+  .birthday-sub {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(13px, 1.8vw, 16px);
+    letter-spacing: 0.3em;
+    color: #fff3c4;
+    opacity: 0.8;
+    padding-left: 0.3em;
+    text-shadow: 0 0 12px rgba(255, 215, 130, 0.6);
+  }
+
+  /* ============ 节日锚定页面 ============ */
+  .stage-festival {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  .festival-head-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0 4px;
+    flex-shrink: 0;
+  }
+
+  .festival-head-bar .label {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(15px, 2.2vw, 18px);
+    letter-spacing: 0.36em;
+    color: #ffe9a8;
+    padding-left: 0.36em;
+    text-shadow: 0 0 16px rgba(255, 215, 130, 0.9), 0 0 32px rgba(255, 195, 80, 0.5);
+  }
+
+  .festival-sub-label {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: rgba(255, 233, 168, 0.6);
+  }
+
+  .festival-year-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    padding: 4px 0 8px;
+    flex-shrink: 0;
+  }
+
+  .fy-btn {
+    padding: 8px 22px;
+    background: rgba(255, 215, 130, 0.12);
+    border: 1px solid rgba(255, 215, 130, 0.4);
+    border-radius: 6px;
+    color: #ffe9a8;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.6);
+  }
+  .fy-btn:hover {
+    background: rgba(255, 215, 130, 0.22);
+    border-color: #ffd966;
+    box-shadow: 0 0 16px rgba(255, 215, 130, 0.5);
+  }
+  .fy-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .fy-year {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    color: #ffe9a8;
+    letter-spacing: 0.1em;
+    min-width: 120px;
+    text-align: center;
+    text-shadow: 0 0 14px rgba(255, 215, 130, 0.8), 0 0 28px rgba(255, 195, 80, 0.4);
+  }
+
+  .festival-toast {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 14, 40, 0.92);
+    border: 1px solid #ffd966;
+    border-radius: 8px;
+    padding: 16px 28px;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.12em;
+    color: #ffe9a8;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.7);
+    box-shadow: 0 0 24px rgba(255, 215, 130, 0.4);
+    z-index: 200;
+    max-width: 90vw;
+    text-align: center;
+    line-height: 1.7;
+    animation: toastIn 0.3s ease-out;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translate(-50%, 10px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+  }
+
+  .festival-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 4px 4px 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 215, 130, 0.4) transparent;
+  }
+  .festival-list::-webkit-scrollbar { width: 6px; }
+  .festival-list::-webkit-scrollbar-track { background: transparent; }
+  .festival-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 130, 0.3);
+    border-radius: 3px;
+  }
+
+  .festival-item {
+    position: relative;
+    padding: 14px 18px 12px;
+    background: rgba(20, 14, 40, 0.4);
+    border: 1px solid rgba(255, 215, 130, 0.2);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.25s;
+  }
+  .festival-item:hover {
+    border-color: rgba(255, 215, 130, 0.5);
+    background: rgba(40, 28, 70, 0.5);
+    box-shadow: 0 0 16px rgba(255, 215, 130, 0.2);
+  }
+
+  .fi-row1 {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .fi-name {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: clamp(18px, 2.6vw, 22px);
+    letter-spacing: 0.12em;
+    color: #ffe9a8;
+    text-shadow: 0 0 12px rgba(255, 215, 130, 0.7);
+  }
+
+  .fi-lunar-date {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: clamp(13px, 1.8vw, 15px);
+    color: rgba(255, 233, 168, 0.75);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+  }
+
+  .fi-row2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 215, 130, 0.12);
+  }
+
+  .fi-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .fi-cell-label {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: rgba(255, 233, 168, 0.5);
+  }
+
+  .fi-cell-value {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: clamp(12px, 1.6vw, 14px);
+    color: #fff3c4;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(255, 215, 130, 0.4);
+  }
+
+  /* corner gold 复用 */
+  .corner.gold {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #ffd966;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 130, 0.8));
+  }
+  .corner.gold.tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+  .corner.gold.tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+  .corner.gold.bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+  .corner.gold.br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+  /* 页面切换动画 */
+  .stage[hidden] { display: none !important; }
+  .stage {
+    animation: stageIn 0.5s ease-out;
+  }
+  @keyframes stageIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============ 生日页面：查/秘按钮 ============ */
+  .birthday-actions {
+    display: flex;
+    gap: 20px;
+    margin-top: 18px;
+  }
+
+  .ba-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid #ffd966;
+    background: rgba(40, 28, 70, 0.3);
+    color: #ffe9a8;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 26px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 12px rgba(255, 215, 130, 0.9);
+    box-shadow: 0 0 16px rgba(255, 215, 130, 0.3), inset 0 0 12px rgba(255, 215, 130, 0.15);
+  }
+
+  .ba-btn:hover {
+    background: rgba(255, 215, 130, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 0 28px rgba(255, 215, 130, 0.6), inset 0 0 16px rgba(255, 215, 130, 0.25);
+  }
+
+  .ba-btn:active {
+    transform: translateY(0);
+  }
+
+  /* ============ 弹窗 ============ */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 8, 24, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: modalFadeIn 0.3s ease-out;
+  }
+  .modal[hidden] { display: none !important; }
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal-card {
+    position: relative;
+    background: rgba(20, 14, 40, 0.85);
+    border: 1px solid rgba(255, 215, 130, 0.3);
+    border-radius: 8px;
+    padding: 32px 36px 28px;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 0 40px rgba(255, 215, 130, 0.2), 0 0 80px rgba(80, 50, 120, 0.3);
+    animation: modalSlideIn 0.4s ease-out;
+  }
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .secret-card {
+    width: 80vw;
+    min-height: 60vh;
+  }
+
+  .modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .modal-head .label {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.3em;
+    color: #ffe9a8;
+    text-shadow: 0 0 14px rgba(255, 215, 130, 0.8);
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid rgba(255, 215, 130, 0.4);
+    color: #ffe9a8;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.2s;
+  }
+  .modal-close:hover {
+    background: rgba(255, 215, 130, 0.15);
+    border-color: #ffd966;
+  }
+
+  .modal-hint {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 14px;
+    color: rgba(255, 233, 168, 0.7);
+    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ============ 查询表单 ============ */
+  .query-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .qf-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .qf-input {
+    width: 70px;
+    background: rgba(10, 8, 24, 0.6);
+    border: 1px solid rgba(255, 215, 130, 0.3);
+    border-radius: 6px;
+    padding: 8px 10px;
+    color: #ffe9a8;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .qf-input:focus {
+    border-color: #ffd966;
+    box-shadow: 0 0 10px rgba(255, 215, 130, 0.3);
+  }
+  .qf-input::placeholder { color: rgba(255, 233, 168, 0.35); }
+
+  .qf-input-wide {
+    width: 100%;
+    flex: 1;
+    text-align: left;
+    padding: 8px 14px;
+  }
+
+  /* 公历模式提示 */
+  .qf-mode-hint {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.06);
+    border-left: 2px solid rgba(255, 215, 130, 0.5);
+    border-radius: 4px;
+    line-height: 1.6;
+  }
+
+  /* 阳历/公历 Tab */
+  .qf-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .qf-tab {
+    flex: 1;
+    padding: 8px 0;
+    background: rgba(10, 8, 24, 0.5);
+    border: 1px solid rgba(255, 215, 130, 0.25);
+    border-radius: 6px;
+    color: rgba(255, 233, 168, 0.6);
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qf-tab.is-active {
+    background: rgba(255, 215, 130, 0.18);
+    border-color: #ffd966;
+    color: #fff3c4;
+    box-shadow: 0 0 12px rgba(255, 215, 130, 0.4);
+  }
+
+  /* 公历子Tab：大写汉字/生辰八字 */
+  .qf-sub-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 4px 0 0;
+  }
+  .qst-btn {
+    flex: 1;
+    padding: 6px 0;
+    background: rgba(10, 8, 24, 0.4);
+    border: 1px solid rgba(255, 215, 130, 0.2);
+    border-radius: 6px;
+    color: rgba(255, 233, 168, 0.55);
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qst-btn.is-active {
+    background: rgba(255, 215, 130, 0.15);
+    border-color: rgba(255, 215, 130, 0.6);
+    color: #ffe9a8;
+  }
+
+  /* 可点击的阳历/公历文字 */
+  .hint-toggle {
+    color: #ffd966;
+    cursor: pointer;
+    border-bottom: 1px dashed rgba(255, 215, 130, 0.5);
+    transition: color 0.2s;
+  }
+  .hint-toggle:hover {
+    color: #fff3c4;
+    border-bottom-color: #fff3c4;
+  }
+
+  /* 结果单行 */
+  .qr-one-line {
+    font-size: 17px;
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  /* ============ 拨动选择器 ============ */
+  .roller-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .roller {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+  }
+
+  .roller-btn {
+    width: 30px;
+    height: 22px;
+    background: rgba(255, 215, 130, 0.1);
+    border: 1px solid rgba(255, 215, 130, 0.3);
+    border-radius: 4px;
+    color: #ffe9a8;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+  .roller-btn:hover {
+    background: rgba(255, 215, 130, 0.25);
+    border-color: #ffd966;
+    box-shadow: 0 0 8px rgba(255, 215, 130, 0.4);
+  }
+  .roller-btn:active {
+    transform: scale(0.92);
+  }
+
+  .roller-val {
+    width: 60px;
+    height: 38px;
+    margin: 3px 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 8, 24, 0.6);
+    border: 1px solid rgba(255, 215, 130, 0.35);
+    border-radius: 6px;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: #fff3c4;
+    text-shadow: 0 0 8px rgba(255, 215, 130, 0.6);
+    transition: all 0.2s;
+  }
+  .roller-val.changed {
+    animation: rollerFlash 0.3s;
+  }
+  @keyframes rollerFlash {
+    0% { background: rgba(255, 215, 130, 0.3); transform: scale(1.08); }
+    100% { background: rgba(10, 8, 24, 0.6); transform: scale(1); }
+  }
+
+  .lunar-section-label {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 12px;
+    color: rgba(255, 233, 168, 0.6);
+    letter-spacing: 0.15em;
+    margin: 10px 0 6px;
+    text-align: center;
+    border-top: 1px dashed rgba(255, 215, 130, 0.15);
+    padding-top: 8px;
+  }
+  .lunar-section-label:first-child {
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+  }
+
+  .lunar-use-row {
+    display: flex;
+    gap: 8px;
+    margin: 12px 0 0;
+  }
+
+  .qf-unit {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    color: #ffe9a8;
+    font-size: 15px;
+    margin-right: 4px;
+  }
+
+  .qf-submit {
+    margin-top: 6px;
+    padding: 10px 32px;
+    background: rgba(255, 215, 130, 0.15);
+    border: 1px solid #ffd966;
+    border-radius: 6px;
+    color: #ffe9a8;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.6);
+  }
+  .qf-submit:hover {
+    background: rgba(255, 215, 130, 0.25);
+    box-shadow: 0 0 18px rgba(255, 215, 130, 0.5);
+  }
+
+  /* ============ 查询结果 ============ */
+  .query-result {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(255, 215, 130, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .qr-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .qr-title {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: rgba(255, 233, 168, 0.7);
+  }
+
+  .qr-content {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    color: #ffe9a8;
+    text-shadow: 0 0 14px rgba(255, 215, 130, 0.8), 0 0 28px rgba(255, 195, 80, 0.4);
+    line-height: 1.6;
+  }
+
+  /* ============ 九宫格 ============ */
+  .secret-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .sg-cell {
+    aspect-ratio: 1;
+    background: rgba(40, 28, 70, 0.4);
+    border: 1px solid rgba(255, 215, 130, 0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    color: #ffe9a8;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.6);
+    user-select: none;
+  }
+
+  .sg-cell:hover {
+    background: rgba(255, 215, 130, 0.12);
+    border-color: #ffd966;
+    box-shadow: 0 0 14px rgba(255, 215, 130, 0.4);
+  }
+
+  .sg-cell.selected {
+    background: rgba(255, 215, 130, 0.25);
+    border-color: #ffd966;
+    box-shadow: 0 0 18px rgba(255, 215, 130, 0.6), inset 0 0 10px rgba(255, 215, 130, 0.2);
+    color: #fff3c4;
+  }
+
+  .sg-cell.error {
+    animation: sgShake 0.4s;
+    border-color: #ff6b6b;
+    box-shadow: 0 0 14px rgba(255, 107, 107, 0.5);
+  }
+  @keyframes sgShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .secret-progress {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .sp-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 215, 130, 0.4);
+    transition: all 0.2s;
+  }
+  .sp-dot.filled {
+    background: #ffd966;
+    box-shadow: 0 0 8px rgba(255, 215, 130, 0.8);
+  }
+
+  /* 秘密错误提示 */
+  .secret-error {
+    margin-top: 14px;
+    padding: 12px 18px;
+    background: rgba(255, 80, 80, 0.1);
+    border: 1px solid rgba(255, 107, 107, 0.5);
+    border-radius: 6px;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #ff9a9a;
+    text-align: center;
+    letter-spacing: 0.08em;
+    line-height: 1.7;
+    text-shadow: 0 0 10px rgba(255, 107, 107, 0.4);
+  }
+
+  /* ============ 家人生日页面 ============ */
+  .family-card {
+    width: 90vw;
+    min-height: 90vh;
+  }
+
+  .family-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+    max-height: 75vh;
+    overflow-y: auto;
+    padding: 4px 4px 20px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 215, 130, 0.4) transparent;
+  }
+  .family-list::-webkit-scrollbar { width: 6px; }
+  .family-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 130, 0.3);
+    border-radius: 3px;
+  }
+
+  .family-item {
+    padding: 14px 18px;
+    background: rgba(40, 28, 70, 0.4);
+    border: 1px solid rgba(255, 215, 130, 0.25);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.25s;
+  }
+  .family-item:hover {
+    border-color: rgba(255, 215, 130, 0.5);
+    background: rgba(40, 28, 70, 0.6);
+    box-shadow: 0 0 16px rgba(255, 215, 130, 0.2);
+  }
+
+  .fi-relation {
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 215, 130, 0.15);
+    border: 1px solid rgba(255, 215, 130, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: #ffe9a8;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.7);
+  }
+
+  .fi-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .fi-name-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .fi-name {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: #fff3c4;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.6);
+  }
+
+  .fi-solar {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 13px;
+    color: rgba(255, 233, 168, 0.7);
+    letter-spacing: 0.05em;
+  }
+
+  .fi-lunar {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: #ffe9a8;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 8px rgba(255, 215, 130, 0.4);
+  }
+
+  /* 倒计时文字默认样式 */
+  .fi-cd {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: rgba(255, 233, 168, 0.75);
+    letter-spacing: 0.05em;
+  }
+
+  /* 已过生日：仅倒计时文字变灰，名字保持金色 */
+  .fi-name-row.is-past .fi-cd {
+    color: #8a8aa0;
+    text-shadow: none;
+  }
+
+  /* 今日生日：倒计时放大发光脉冲 */
+  .fi-name-row.is-today .fi-name,
+  .fi-name-row.is-today .fi-cd {
+    font-size: 22px;
+    color: #fff3c4;
+    text-shadow: 0 0 14px rgba(255, 215, 130, 0.9), 0 0 28px rgba(255, 195, 80, 0.6);
+    animation: todayPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes todayPulse {
+    0%, 100% { text-shadow: 0 0 14px rgba(255, 215, 130, 0.9), 0 0 28px rgba(255, 195, 80, 0.6); }
+    50% { text-shadow: 0 0 20px rgba(255, 215, 130, 1), 0 0 40px rgba(255, 195, 80, 0.8); }
+  }
+
+  /* 7天内生日：倒计时放大发光 */
+  .fi-name-row.is-soon .fi-name,
+  .fi-name-row.is-soon .fi-cd {
+    font-size: 20px;
+    color: #fff3c4;
+    text-shadow: 0 0 12px rgba(255, 215, 130, 0.8), 0 0 24px rgba(255, 195, 80, 0.5);
+  }
+</style>
+</head>
+<body>
+  <div class="bg-gradient"></div>
+  <div class="glow g1"></div>
+  <div class="glow g2"></div>
+  <div class="glow g3"></div>
+  <div class="noise"></div>
+
+  <main class="stage stage-time" id="stageTime">
+    <!-- 阳历：大时间 + 日期 -->
+    <section class="solar">
+      <span class="corner tl"></span>
+      <span class="corner tr"></span>
+      <span class="corner bl"></span>
+      <span class="corner br"></span>
+      <div class="solar-head">
+        <span class="label">阳历 · Solar</span>
+        <span class="line"></span>
+        <span class="tag">公元纪年</span>
+      </div>
+      <div class="time" id="solarTime">00:00:00</div>
+      <div class="date" id="solarDate"></div>
+    </section>
+
+    <!-- 雷电金钟 + 外围三层圆环 -->
+    <div class="clock-orbit-wrap">
+      <!-- 最外环：66点 逆时针 -->
+      <svg class="orbit-ring orbit-outer-ccw" viewBox="-160 -160 320 320" aria-hidden="true">
+        <g class="orbit-dots" id="orbitDots3"></g>
+      </svg>
+      <!-- 中环：48点 顺时针 -->
+      <svg class="orbit-ring orbit-cw" viewBox="-160 -160 320 320" aria-hidden="true">
+        <g class="orbit-dots" id="orbitDots1"></g>
+      </svg>
+      <!-- 内环：48点 逆时针 闪烁 -->
+      <svg class="orbit-ring orbit-ccw" viewBox="-160 -160 320 320" aria-hidden="true">
+        <g class="orbit-dots" id="orbitDots2"></g>
+      </svg>
+
+    <!-- 雷电金钟 -->
+    <div class="clock-wrap" id="clockWrap">
+      <svg class="clock" viewBox="-150 -150 300 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="goldLightning" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="1.6" result="blur1"/>
+            <feGaussianBlur stdDeviation="4" result="blur2"/>
+            <feMerge>
+              <feMergeNode in="blur2"/>
+              <feMergeNode in="blur1"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+          <radialGradient id="clockBg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="rgba(40,28,70,0.25)"/>
+            <stop offset="80%" stop-color="rgba(20,14,40,0.45)"/>
+            <stop offset="100%" stop-color="rgba(10,8,24,0.6)"/>
+          </radialGradient>
+        </defs>
+
+        <!-- 背景圆 -->
+        <circle cx="0" cy="0" r="138" fill="url(#clockBg)"/>
+
+        <!-- 外层电弧装饰 -->
+        <circle class="arc" cx="0" cy="0" r="146"/>
+        <circle class="arc" cx="0" cy="0" r="140" style="animation-direction: reverse; animation-duration: 22s;"/>
+
+        <!-- 金环 -->
+        <circle class="ring-outer" cx="0" cy="0" r="130"/>
+        <circle class="ring-inner" cx="0" cy="0" r="118"/>
+
+        <!-- 刻度（由JS生成） -->
+        <g id="ticks"></g>
+
+        <!-- 阿拉伯数字 1-12 -->
+        <g class="numerals arabic" id="numeralsArabic"></g>
+        <!-- 十二时辰 子丑寅卯... -->
+        <g class="numerals chinese" id="numeralsChinese"></g>
+
+        <!-- 闪电指针 -->
+        <g class="hand hour" id="handHour">
+          <path d="M -2.4 8 L 2.4 8 L 1 -6 L 3.4 -6 L 0 -58 L -3.4 -6 L -1 -6 Z"/>
+        </g>
+        <g class="hand minute" id="handMinute">
+          <path d="M -2 9 L 2 9 L 0.8 -6 L 2.8 -6 L 0 -88 L -2.8 -6 L -0.8 -6 Z"/>
+        </g>
+        <g class="hand second" id="handSecond">
+          <path d="M -1.3 12 L 1.3 12 L 0.5 -6 L 2 -6 L 0 -108 L -2 -6 L -0.5 -6 Z"/>
+        </g>
+
+        <!-- 中心点 -->
+        <circle class="center-dot" cx="0" cy="0" r="4.5"/>
+        <circle cx="0" cy="0" r="1.6" fill="#fff8e0"/>
+      </svg>
+    </div>
+    </div><!-- /.clock-orbit-wrap -->
+
+    <!-- 农历：12时辰 + 干支年月日 -->
+    <section class="lunar-panel">
+      <span class="corner tl"></span>
+      <span class="corner tr"></span>
+      <span class="corner bl"></span>
+      <span class="corner br"></span>
+
+      <div class="lunar-head">
+        <span class="label">农历 · Lunar</span>
+        <span class="line"></span>
+        <span class="tag">干支纪时</span>
+      </div>
+      <div class="lunar-time" id="lunarTime">子时初刻零秒</div>
+      <div class="lunar-date" id="lunarDate"></div>
+      <div class="lunar-date-cn" id="lunarDateCn"></div>
+    </section>
+  </main>
+
+  <!-- ============ 生日锚定页面 ============ -->
+  <main class="stage stage-birthday" id="stageBirthday" hidden>
+    <div class="birthday-card">
+      <span class="corner tl gold"></span>
+      <span class="corner tr gold"></span>
+      <span class="corner bl gold"></span>
+      <span class="corner br gold"></span>
+
+      <div class="birthday-head">
+        <span class="label">生辰锚定 · Birthday</span>
+      </div>
+
+      <!-- 小钟表 -->
+      <div class="mini-clock-wrap">
+        <svg class="mini-clock" viewBox="-150 -150 300 300">
+          <defs>
+            <filter id="miniGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <radialGradient id="miniCenterGlow">
+              <stop offset="0%" stop-color="#ffe9a8" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#ffe9a8" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <circle cx="0" cy="0" r="135" fill="url(#miniCenterGlow)"/>
+          <!-- 外环 -->
+          <circle cx="0" cy="0" r="125" fill="none" stroke="#ffd966" stroke-width="2" filter="url(#miniGlow)" opacity="0.9"/>
+          <circle cx="0" cy="0" r="118" fill="none" stroke="#ffd966" stroke-width="1" opacity="0.4" stroke-dasharray="3 6"/>
+          <!-- 刻度 -->
+          <g id="miniTicks"></g>
+          <!-- 数字 -->
+          <g id="miniNumerals"></g>
+          <!-- 指针 -->
+          <line id="miniHandHour" x1="0" y1="10" x2="0" y2="-55" stroke="#ffd966" stroke-width="4" stroke-linecap="round" filter="url(#miniGlow)"/>
+          <line id="miniHandMinute" x1="0" y1="14" x2="0" y2="-80" stroke="#ffe9a8" stroke-width="3" stroke-linecap="round" filter="url(#miniGlow)"/>
+          <line id="miniHandSecond" x1="0" y1="18" x2="0" y2="-95" stroke="#fff3c4" stroke-width="1.5" stroke-linecap="round" filter="url(#miniGlow)"/>
+          <circle cx="0" cy="0" r="14" fill="#ffd966" opacity="0.25" class="mini-center-breath"/>
+          <circle cx="0" cy="0" r="8" fill="#ffd966" filter="url(#miniGlow)" class="mini-center-core"/>
+          <circle cx="0" cy="0" r="3" fill="#fff3c4"/>
+        </svg>
+      </div>
+      <!-- 闪电层 -->
+      <svg class="lightning-layer" id="lightningLayer" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <div class="birthday-label" id="birthdayLabel">生辰时刻</div>
+      <div class="birthday-sub">待定 · 时光未锁</div>
+
+      <!-- 查 / 秘 按钮 -->
+      <div class="birthday-actions">
+        <button class="ba-btn" type="button" id="btnQuery">查</button>
+        <button class="ba-btn" type="button" id="btnSecret">秘</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 查询弹窗 -->
+  <div class="modal" id="modalQuery" hidden>
+    <div class="modal-card query-card">
+      <span class="corner tl gold"></span>
+      <span class="corner tr gold"></span>
+      <span class="corner bl gold"></span>
+      <span class="corner br gold"></span>
+
+      <div class="modal-head">
+        <span class="label">生辰查询 · Inquiry</span>
+        <button class="modal-close" type="button" data-close="modalQuery" aria-label="关闭">×</button>
+      </div>
+
+      <!-- 阳历 / 公历 切换 -->
+      <div class="qf-tabs">
+        <button class="qf-tab is-active" type="button" data-mode="solar" id="tabSolar">阳历</button>
+        <button class="qf-tab" type="button" data-mode="lunar" id="tabLunar">公历</button>
+      </div>
+
+      <!-- 阳历拨动选择器 -->
+      <div class="query-form" id="formSolar">
+        <div class="roller-row">
+          <div class="roller" data-id="rollSY" data-min="1900" data-max="2099" data-val="2000"></div>
+          <span class="qf-unit">年</span>
+          <div class="roller" data-id="rollSM" data-min="1" data-max="12" data-val="1"></div>
+          <span class="qf-unit">月</span>
+          <div class="roller" data-id="rollSD" data-min="1" data-max="31" data-val="1"></div>
+          <span class="qf-unit">日</span>
+          <div class="roller" data-id="rollSH" data-min="0" data-max="23" data-val="12"></div>
+          <span class="qf-unit">时</span>
+        </div>
+        <button class="qf-submit" type="button" id="btnDoQuery">查询</button>
+      </div>
+
+      <!-- 公历拨动选择器（大写汉字 + 八字） -->
+      <div class="query-form" id="formLunar" hidden>
+        <!-- 大写汉字 -->
+        <div class="lunar-section-label">大写汉字</div>
+        <div class="roller-row">
+          <div class="roller" data-id="rollLY" data-type="cn-year" data-val="25"></div>
+          <span class="qf-unit">年</span>
+          <div class="roller" data-id="rollLM" data-type="cn-month" data-val="0"></div>
+          <span class="qf-unit">月</span>
+          <div class="roller" data-id="rollLD" data-type="cn-day" data-val="0"></div>
+          <span class="qf-unit">日</span>
+          <div class="roller" data-id="rollLH" data-type="cn-hour" data-val="6"></div>
+          <span class="qf-unit">时</span>
+        </div>
+
+        <!-- 生辰八字 -->
+        <div class="lunar-section-label">生辰八字 · 天干地支</div>
+        <div class="roller-row">
+          <div class="roller" data-id="rollBY" data-type="bazi" data-val="0"></div>
+          <span class="qf-unit">年柱</span>
+          <div class="roller" data-id="rollBM" data-type="bazi" data-val="0"></div>
+          <span class="qf-unit">月柱</span>
+          <div class="roller" data-id="rollBD" data-type="bazi" data-val="0"></div>
+          <span class="qf-unit">日柱</span>
+          <div class="roller" data-id="rollBH" data-type="bazi" data-val="0"></div>
+          <span class="qf-unit">时柱</span>
+        </div>
+
+        <div class="lunar-use-row">
+          <button class="qst-btn is-active" type="button" data-lunar-type="cn" id="lstCn">用大写汉字查询</button>
+          <button class="qst-btn" type="button" data-lunar-type="bazi" id="lstBazi">用生辰八字查询</button>
+        </div>
+        <button class="qf-submit" type="button" id="btnDoQueryLunar">查询</button>
+      </div>
+
+      <!-- 查询结果：始终显示三项 -->
+      <div class="query-result" id="queryResult" hidden>
+        <div class="qr-section">
+          <div class="qr-title">生辰八字</div>
+          <div class="qr-content qr-one-line" id="qrBazi">—</div>
+        </div>
+        <div class="qr-section">
+          <div class="qr-title">农历大写</div>
+          <div class="qr-content qr-one-line" id="qrLunar">—</div>
+        </div>
+        <div class="qr-section">
+          <div class="qr-title">阳历</div>
+          <div class="qr-content qr-one-line" id="qrSolar">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 秘密九宫格弹窗 -->
+  <div class="modal" id="modalSecret" hidden>
+    <div class="modal-card secret-card">
+      <span class="corner tl gold"></span>
+      <span class="corner tr gold"></span>
+      <span class="corner bl gold"></span>
+      <span class="corner br gold"></span>
+
+      <div class="modal-head">
+        <span class="label">秘钥 · Secret</span>
+        <button class="modal-close" type="button" data-close="modalSecret" aria-label="关闭">×</button>
+      </div>
+
+      <div class="modal-hint">点选时辰，依序而入</div>
+
+      <div class="secret-grid" id="secretGrid"></div>
+      <div class="secret-progress" id="secretProgress"></div>
+      <div class="secret-error" id="secretError" hidden></div>
+    </div>
+  </div>
+
+  <!-- 家人生日页面（密码正确后显示） -->
+  <div class="modal" id="modalFamily" hidden>
+    <div class="modal-card family-card">
+      <span class="corner tl gold"></span>
+      <span class="corner tr gold"></span>
+      <span class="corner bl gold"></span>
+      <span class="corner br gold"></span>
+
+      <div class="modal-head">
+        <span class="label">至亲生辰 · Family</span>
+        <button class="modal-close" type="button" data-close="modalFamily" aria-label="关闭">×</button>
+      </div>
+
+      <div class="modal-hint">血脉相连 · 生辰铭记</div>
+
+      <div class="family-list" id="familyList"></div>
+    </div>
+  </div>
+
+  <!-- ============ 节日锚定页面 ============ -->
+  <main class="stage stage-festival" id="stageFestival" hidden>
+    <div class="festival-head-bar">
+      <span class="label">节庆锚定 · Festival</span>
+      <span class="festival-sub-label">中华上下五千年 · 节庆纪元</span>
+    </div>
+    <div class="festival-year-bar">
+      <button class="fy-btn" type="button" id="fyPrev">上一年</button>
+      <span class="fy-year" id="fyYear">—</span>
+      <button class="fy-btn" type="button" id="fyNext">下一年</button>
+    </div>
+    <div class="festival-list" id="festivalList"></div>
+    <div class="festival-toast" id="festivalToast" hidden></div>
+  </main>
+
+  <nav class="dock">
+    <button class="anchor-btn is-active" type="button" data-anchor="time" aria-label="时间锚定">
+      <span class="btn-inner">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 7v5l3 2"/>
+        </svg>
+        <span class="btn-label">时间锚定</span>
+        <span class="btn-sub">Time</span>
+      </span>
+    </button>
+    <button class="anchor-btn" type="button" data-anchor="birthday" aria-label="生日锚定">
+      <span class="btn-inner">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 4v3"/>
+          <path d="M9.5 5.5c0-1 1-2 2.5-2s2.5 1 2.5 2c0 1.2-1.5 1.5-2.5 1.5"/>
+          <rect x="5" y="11" width="14" height="9" rx="1.5"/>
+          <path d="M5 15h14"/>
+        </svg>
+        <span class="btn-label">生日锚定</span>
+        <span class="btn-sub">Birthday</span>
+      </span>
+    </button>
+    <button class="anchor-btn" type="button" data-anchor="festival" aria-label="节日锚定">
+      <span class="btn-inner">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3l2.2 4.5 4.9.7-3.5 3.4.8 4.9L12 14.6 7.6 16.5l.8-4.9L4.9 8.2l4.9-.7L12 3z"/>
+        </svg>
+        <span class="btn-label">节日锚定</span>
+        <span class="btn-sub">Festival</span>
+      </span>
+    </button>
+  </nav>
+
+  <script>
+    // ============ 钟表初始化 ============
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const SHICHEN = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    const clockWrap = document.getElementById('clockWrap');
+    const ticksG = document.getElementById('ticks');
+    const numArabicG = document.getElementById('numeralsArabic');
+    const numChineseG = document.getElementById('numeralsChinese');
+    const handHour = document.getElementById('handHour');
+    const handMinute = document.getElementById('handMinute');
+    const handSecond = document.getElementById('handSecond');
+
+    const NUM_R = 100;      // 数字半径
+    const TICK_OUT = 124;   // 外刻度起点
+    const TICK_IN_MAJOR = 110;  // 主刻度终点
+    const TICK_IN_MINOR = 116;  // 次刻度终点
+
+    // ============ 外围三层圆环：48点 + 48点 + 66点 ============
+    const ORBIT_R = 150;      // 圆点半径
+    function buildOrbitDots(container, count, majorStep, scale) {
+      const s = scale || 1;
+      const frag = document.createDocumentFragment();
+      for (let i = 0; i < count; i++) {
+        const angle = (i * (360 / count) - 90) * Math.PI / 180;
+        const x = Math.cos(angle) * ORBIT_R;
+        const y = Math.sin(angle) * ORBIT_R;
+        const isMajor = i % majorStep === 0;
+        const c = document.createElementNS(SVG_NS, 'circle');
+        c.setAttribute('cx', x);
+        c.setAttribute('cy', y);
+        c.setAttribute('r', (isMajor ? 2.6 : 1.6) * s);
+        c.setAttribute('class', isMajor ? 'dot major' : 'dot');
+        // 闪烁错位延迟
+        c.style.animationDelay = (i * 0.05) + 's';
+        frag.appendChild(c);
+      }
+      container.appendChild(frag);
+    }
+    buildOrbitDots(document.getElementById('orbitDots1'), 48, 4);
+    buildOrbitDots(document.getElementById('orbitDots2'), 48, 4, 2);
+    buildOrbitDots(document.getElementById('orbitDots3'), 66, 6);
+
+    // ============ 圆环文字：竖排跟随圆点运动 ============
+    // 中环：阳历、公历、时间、锚定（4组，顺时针）
+    const midLabels = ['阳历', '公历', '时间', '锚定'];
+    // 最外环：农历、阴历、天干、地支（4组，逆时针）
+    const outerLabels = ['农历', '阴历', '天干', '地支'];
+
+    // 创建竖排文字组（一个 g 包裹多个字，字垂直排列）
+    function createLabelGroup(svgEl, text) {
+      const g = document.createElementNS(SVG_NS, 'g');
+      g.setAttribute('class', 'orbit-label-group');
+      const chars = text.split('');
+      const spacing = 15;
+      const startY = -(chars.length - 1) * spacing / 2;
+      chars.forEach((ch, i) => {
+        const t = document.createElementNS(SVG_NS, 'text');
+        t.setAttribute('x', 0);
+        t.setAttribute('y', startY + i * spacing);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('dominant-baseline', 'central');
+        t.setAttribute('class', 'orbit-label');
+        t.textContent = ch;
+        g.appendChild(t);
+      });
+      svgEl.appendChild(g);
+      return g;
+    }
+
+    const midSvg = document.querySelector('.orbit-cw');
+    const midGroups = midLabels.map(w => createLabelGroup(midSvg, w));
+    const outerSvg = document.querySelector('.orbit-outer-ccw');
+    const outerGroups = outerLabels.map(w => createLabelGroup(outerSvg, w));
+
+    // 圆形轨道动画：4组均匀分布（90度间隔）
+    const ORBIT_LABEL_R = 150;
+    function animateOrbitLabels() {
+      const now = performance.now();
+      // 中环：顺时针，60s一圈
+      const midPeriod = 60000;
+      const midPhase = (now % midPeriod) / midPeriod * Math.PI * 2;
+      midGroups.forEach((g, i) => {
+        const a = midPhase + (i * Math.PI / 2) - Math.PI / 2;
+        const x = Math.cos(a) * ORBIT_LABEL_R;
+        const y = Math.sin(a) * ORBIT_LABEL_R;
+        g.setAttribute('transform', `translate(${x},${y})`);
+      });
+      // 最外环：逆时针，72s一圈
+      const outPeriod = 72000;
+      const outPhase = -((now % outPeriod) / outPeriod * Math.PI * 2);
+      outerGroups.forEach((g, i) => {
+        const a = outPhase + (i * Math.PI / 2) - Math.PI / 2;
+        const x = Math.cos(a) * ORBIT_LABEL_R;
+        const y = Math.sin(a) * ORBIT_LABEL_R;
+        g.setAttribute('transform', `translate(${x},${y})`);
+      });
+      requestAnimationFrame(animateOrbitLabels);
+    }
+    requestAnimationFrame(animateOrbitLabels);
+
+    // 生成 60 个刻度 + 12 个数字
+    for (let i = 0; i < 60; i++) {
+      const angle = (i * 6 - 90) * Math.PI / 180;
+      const isMajor = i % 5 === 0;
+      const x1 = Math.cos(angle) * TICK_OUT;
+      const y1 = Math.sin(angle) * TICK_OUT;
+      const x2 = Math.cos(angle) * (isMajor ? TICK_IN_MAJOR : TICK_IN_MINOR);
+      const y2 = Math.sin(angle) * (isMajor ? TICK_IN_MAJOR : TICK_IN_MINOR);
+      const line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('class', isMajor ? 'tick' : 'tick minor');
+      ticksG.appendChild(line);
+    }
+
+    // 12 个阿拉伯数字（顶部为12，顺时针1~11）
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * 30 - 90) * Math.PI / 180;
+      const x = Math.cos(angle) * NUM_R;
+      const y = Math.sin(angle) * NUM_R;
+      const t = document.createElementNS(SVG_NS, 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y);
+      t.setAttribute('font-size', i === 0 ? 24 : 19);
+      t.textContent = i === 0 ? 12 : i;
+      numArabicG.appendChild(t);
+    }
+
+    // 12 个时辰汉字（顶部为子，顺时针丑寅卯...）
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * 30 - 90) * Math.PI / 180;
+      const x = Math.cos(angle) * NUM_R;
+      const y = Math.sin(angle) * NUM_R;
+      const t = document.createElementNS(SVG_NS, 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y);
+      t.setAttribute('font-size', 22);
+      t.textContent = SHICHEN[i];
+      numChineseG.appendChild(t);
+    }
+
+    // 指针角度更新（每秒一走，累计角度避免 59→0 回旋）
+    const _cyc = { h: 0, m: 0, s: 0 };
+    const _last = { h: -1, m: -1, s: -1 };
+    let _firstHands = true;
+
+    // 时针角度：根据当前模式计算
+    // 阿拉伯模式：12小时制，时针12小时转一圈（每天2圈）
+    // 时辰模式：12时辰制，时针24小时转一圈（每天1圈，1时辰=2小时）
+    function getHourAngle(h, m, s) {
+      if (clockMode === 'chinese') {
+        // 时辰索引：子=0, 丑=1, ..., 亥=11
+        const shichenIdx = Math.floor(((h + 1) % 24) / 2);
+        // 时辰内进度（0-2小时映射到0-1）
+        const isOddHour = h % 2 === 1; // 奇数小时为时辰的第2小时
+        const hourOffset = isOddHour ? 1 : 0;
+        const progress = (hourOffset + m / 60 + s / 3600) / 2;
+        return (shichenIdx + progress) * 30;
+      } else {
+        // 阿拉伯模式：12小时制
+        return (h % 12) * 30 + m * 0.5 + s * (0.5 / 60);
+      }
+    }
+
+    function updateHands(now, skipTransition = false) {
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+      if (!skipTransition) {
+        if (_last.s !== -1 && s < _last.s) _cyc.s++;
+        if (_last.m !== -1 && m < _last.m) _cyc.m++;
+        if (_last.h !== -1 && h < _last.h) _cyc.h++;
+      }
+      _last.h = h; _last.m = m; _last.s = s;
+      const hourDeg = _cyc.h * 360 + getHourAngle(h, m, s);
+      const minDeg = _cyc.m * 360 + m * 6 + s * 0.1;
+      const secDeg = _cyc.s * 360 + s * 6;
+      if (_firstHands || skipTransition) {
+        [handHour, handMinute, handSecond].forEach(el => el.style.transition = 'none');
+      }
+      handHour.style.transform = `rotate(${hourDeg}deg)`;
+      handMinute.style.transform = `rotate(${minDeg}deg)`;
+      handSecond.style.transform = `rotate(${secDeg}deg)`;
+      if (_firstHands || skipTransition) {
+        void handHour.offsetWidth; // 强制 reflow
+        [handHour, handMinute, handSecond].forEach(el => el.style.transition = '');
+        _firstHands = false;
+      }
+    }
+
+    // 每 5 秒切换阿拉伯 / 时辰
+    let clockMode = 'arabic';
+    function toggleClockMode() {
+      clockMode = clockMode === 'arabic' ? 'chinese' : 'arabic';
+      clockWrap.classList.toggle('is-chinese', clockMode === 'chinese');
+      // 切换模式时针基准变化，重置时针累计角度并瞬间跳转
+      _cyc.h = 0;
+      _last.h = -1;
+      updateHands(new Date(), true);
+    }
+    setInterval(toggleClockMode, 5000);
+
+    // ============ 干支 / 时辰 计算 ============
+    const GAN = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+    const ZHI = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    // 刻名：每15分钟一刻，每小时内4刻循环
+    // 初刻(0-14分) → 二刻(15-29分) → 三刻(30-44分) → 四刻(45-59分)
+    // 一个时辰=2小时=8刻，刻名每小时循环重置
+    const KE_NAMES = ['初刻','二刻','三刻','四刻'];
+
+    // 60甲子表
+    const GANZHI = [];
+    for (let i = 0; i < 60; i++) GANZHI.push(GAN[i % 10] + ZHI[i % 12]);
+
+    // 年干支（1984 = 甲子年）
+    function getYearGanZhi(year) {
+      const offset = ((year - 1984) % 60 + 60) % 60;
+      return GANZHI[offset];
+    }
+
+    // 月干支：按阳历月份近似对应月支（1月=丑, 2月=寅, ..., 12月=子）
+    function getMonthGanZhi(date) {
+      const year = date.getFullYear();
+      const month = date.getMonth() + 1;
+      const monthZhiIdx = month % 12; // 12→0(子), 1→1(丑), 2→2(寅)...
+      const yearGan = GAN.indexOf(getYearGanZhi(year)[0]);
+      // 月干公式：月干 = (年干*2 + 月支序号) % 10
+      const monthGan = ((yearGan * 2 + monthZhiIdx) % 10 + 10) % 10;
+      return GAN[monthGan] + ZHI[monthZhiIdx];
+    }
+
+    // 日干支：JDN 法（基准：JDN + 49 ≡ 0 为甲子）
+    function getDayGanZhi(date) {
+      let y = date.getFullYear();
+      let m = date.getMonth() + 1;
+      let d = date.getDate();
+      const a = Math.floor((14 - m) / 12);
+      y = y + 4800 - a;
+      m = m + 12 * a - 3;
+      const jdn = d + Math.floor((153 * m + 2) / 5) + 365 * y
+                + Math.floor(y / 4) - Math.floor(y / 100) + Math.floor(y / 400) - 32045;
+      const idx = ((jdn + 49) % 60 + 60) % 60;
+      return GANZHI[idx];
+    }
+
+    // 12时辰换算公式：1时辰 = 2小时，全天12时辰
+    // 23-1点=子, 1-3点=丑, 3-5点=寅, 5-7点=卯, 7-9点=辰, 9-11点=巳,
+    // 11-13点=午, 13-15点=未, 15-17点=申, 17-19点=酉, 19-21点=戌, 21-23点=亥
+    function getShichen(hour) {
+      return ZHI[Math.floor(((hour + 1) % 24) / 2)];
+    }
+
+    // 刻数换算公式：1刻 = 15分钟，1时辰(2小时) = 8刻，每小时4刻循环
+    // 0-14分=初刻(0), 15-29分=二刻(1), 30-44分=三刻(2), 45-59分=四刻(3)
+    function getKe(minute) {
+      return Math.floor(minute / 15);
+    }
+
+    // ============ 农历转换（基于内置农历数据表） ============
+    // 农历数据表（1900-2099），每年4字节（16位）压缩信息
+    // 数据格式：(闰月月份+大小月+闰月大小月+各月大小月)，详见 lunarInfo 标准
+    const lunarInfo = [
+      0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,//1900-1909
+      0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,//1910-1919
+      0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,//1920-1929
+      0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,//1930-1939
+      0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,//1940-1949
+      0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,//1950-1959
+      0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,//1960-1969
+      0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,//1970-1979
+      0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,//1980-1989
+      0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x055c0,0x0ab60,0x096d5,0x092e0,//1990-1999
+      0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,//2000-2009
+      0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,//2010-2019
+      0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,//2020-2029
+      0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,//2030-2039
+      0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,//2040-2049
+      0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06b20,0x1a6c4,0x0aae0,//2050-2059
+      0x0a2e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,//2060-2069
+      0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,//2070-2079
+      0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,//2080-2089
+      0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a2d0,0x0d150,0x0f252//2090-2099
+    ];
+
+    // 返回农历某年的总天数
+    function lunarYearDays(y) {
+      let sum = 348;
+      for (let i = 0x8000; i > 0x8; i >>= 1) sum += (lunarInfo[y - 1900] & i) ? 1 : 0;
+      return sum + leapDays(y);
+    }
+    // 闰月天数
+    function leapDays(y) {
+      if (leapMonth(y)) return (lunarInfo[y - 1900] & 0x10000) ? 30 : 29;
+      return 0;
+    }
+    // 闰月月份（0表示无闰月）
+    function leapMonth(y) { return lunarInfo[y - 1900] & 0xf; }
+    // 某月天数（m: 1-12）
+    function monthDays(y, m) { return (lunarInfo[y - 1900] & (0x10000 >> m)) ? 30 : 29; }
+
+    // 阳历 → 农历
+    function solarToLunar(date) {
+      const baseDate = new Date(1900, 0, 31); // 1900-01-31 = 农历1900正月初一
+      let offset = Math.floor((date.getTime() - baseDate.getTime()) / 86400000);
+      let y, temp = 0;
+      for (y = 1900; y < 2099 && offset > 0; y++) {
+        temp = lunarYearDays(y);
+        offset -= temp;
+      }
+      if (offset < 0) { offset += temp; y--; }
+      const lunarY = y;
+      const leap = leapMonth(y);
+      let isLeap = false;
+      let m, days;
+      for (m = 1; m < 13 && offset > 0; m++) {
+        if (leap > 0 && m === leap + 1 && !isLeap) {
+          m--; isLeap = true; days = leapDays(y);
+        } else {
+          days = monthDays(y, m);
+        }
+        offset -= days;
+        if (isLeap && m === leap) isLeap = false;
+      }
+      if (offset === 0 && leap > 0 && m === leap + 1) {
+        if (isLeap) { isLeap = false; } else { isLeap = true; m--; }
+      }
+      if (offset < 0) { offset += days; m--; }
+      return {
+        year: lunarY,
+        month: m,
+        day: offset + 1,
+        isLeap: isLeap
+      };
+    }
+
+    // 数字 → 大写汉字（年月日）
+    function yearToChinese(year) {
+      const d = ['零','一','二','三','四','五','六','七','八','九'];
+      return String(year).split('').map(c => d[parseInt(c)]).join('');
+    }
+    function dayToChinese(n) {
+      const names = [
+        '初一','初二','初三','初四','初五','初六','初七','初八','初九','初十',
+        '十一','十二','十三','十四','十五','十六','十七','十八','十九','二十',
+        '廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'
+      ];
+      return names[n - 1] || '';
+    }
+    const LUNAR_MONTH_PREFIX = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+
+    // 数字 → 中文（0-59）
+    function toChinese(n) {
+      const d = ['零','一','二','三','四','五','六','七','八','九'];
+      if (n === 0) return '零';
+      if (n < 10) return d[n];
+      if (n < 100) {
+        const tens = Math.floor(n / 10);
+        const ones = n % 10;
+        const t = tens === 1 ? '十' : d[tens] + '十';
+        return ones === 0 ? t : t + d[ones];
+      }
+      // 三位数 100-900
+      const hundreds = Math.floor(n / 100);
+      const rest = n % 100;
+      const h = d[hundreds] + '百';
+      if (rest === 0) return h;
+      if (rest < 10) return h + '零' + d[rest];
+      const tens = Math.floor(rest / 10);
+      const ones = rest % 10;
+      const t = tens === 1 ? '一十' : (tens === 0 ? '零' : d[tens] + '十');
+      return ones === 0 ? h + t : h + t + d[ones];
+    }
+
+    // ============ 实时同步设备时间 ============
+    const pad = n => String(n).padStart(2, '0');
+
+    function update() {
+      const now = new Date(); // 自动取设备本地时间
+
+      // 钟表指针
+      updateHands(now);
+
+      // 阳历：HH:MM:SS（24小时制）
+      document.getElementById('solarTime').textContent =
+        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      // 阳历日期：YYYY年MM月DD日
+      document.getElementById('solarDate').innerHTML =
+        `<span>${now.getFullYear()}</span><span class="unit">年</span>` +
+        `<span>${pad(now.getMonth() + 1)}</span><span class="unit">月</span>` +
+        `<span>${pad(now.getDate())}</span><span class="unit">日</span>`;
+
+      // 农历时辰：子时初刻 累积倏忽（每刻15分钟=900秒，0→899循环归零）
+      const shichen = getShichen(now.getHours());
+      const ke = getKe(now.getMinutes());
+      const minute = now.getMinutes();
+      const sec = now.getSeconds();
+      // 累积倏忽：当前刻内已过的秒数（0-899），900秒=15分钟=1刻，归零重计
+      const shuhu = (minute % 15) * 60 + sec;
+      document.getElementById('lunarTime').textContent =
+        `${shichen}时${KE_NAMES[ke]}${toChinese(shuhu)}倏忽`;
+
+      // 农历日期：丙午年 丁酉月 戊午日（三列等宽对齐）
+      const yGz = getYearGanZhi(now.getFullYear());
+      const mGz = getMonthGanZhi(now);
+      const dGz = getDayGanZhi(now);
+      document.getElementById('lunarDate').innerHTML =
+        `<span class="col"><span>${yGz}</span><span class="unit">年</span></span>` +
+        `<span class="col"><span>${mGz}</span><span class="unit">月</span></span>` +
+        `<span class="col"><span>${dGz}</span><span class="unit">日</span></span>`;
+
+      // 农历汉字大写日期：二零二六年 七月 初五日（三列等宽对齐）
+      const lunar = solarToLunar(now);
+      const leapPrefix = lunar.isLeap ? '闰' : '';
+      document.getElementById('lunarDateCn').innerHTML =
+        `<span class="col"><span>${yearToChinese(lunar.year)}</span><span class="unit">年</span></span>` +
+        `<span class="col"><span class="month-prefix">${leapPrefix}${LUNAR_MONTH_PREFIX[lunar.month - 1]}</span><span class="unit">月</span></span>` +
+        `<span class="col"><span>${dayToChinese(lunar.day)}</span><span class="unit">日</span></span>`;
+    }
+
+    update();
+    setInterval(update, 1000);
+
+    // ============ 按钮交互 + 页面切换 ============
+    const stageTime = document.querySelector('.stage-time');
+    const stageBirthday = document.getElementById('stageBirthday');
+    const stageFestival = document.getElementById('stageFestival');
+    const allStages = [stageTime, stageBirthday, stageFestival];
+
+    function showStage(target) {
+      allStages.forEach(s => { if (s) s.hidden = true; });
+      if (target) target.hidden = false;
+    }
+
+    document.querySelectorAll('.anchor-btn').forEach(btn => {
+      btn.addEventListener('pointermove', e => {
+        const r = btn.getBoundingClientRect();
+        btn.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+        btn.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+      });
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.anchor-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        const anchor = btn.dataset.anchor;
+        if (anchor === 'time') showStage(stageTime);
+        else if (anchor === 'birthday') showStage(stageBirthday);
+        else if (anchor === 'festival') showStage(stageFestival);
+      });
+    });
+
+    // ============ 生日锚定小钟表 ============
+    const miniTicksG = document.getElementById('miniTicks');
+    const miniNumeralsG = document.getElementById('miniNumerals');
+    const miniHour = document.getElementById('miniHandHour');
+    const miniMinute = document.getElementById('miniHandMinute');
+    const miniSecond = document.getElementById('miniHandSecond');
+
+    // 生成刻度
+    for (let i = 0; i < 60; i++) {
+      const angle = (i * 6 - 90) * Math.PI / 180;
+      const isMajor = i % 5 === 0;
+      const x1 = Math.cos(angle) * 115;
+      const y1 = Math.sin(angle) * 115;
+      const x2 = Math.cos(angle) * (isMajor ? 100 : 108);
+      const y2 = Math.sin(angle) * (isMajor ? 100 : 108);
+      const line = document.createElementNS(SVG_NS, 'line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('class', isMajor ? 'tick' : 'tick minor');
+      miniTicksG.appendChild(line);
+    }
+    // 生成数字（顶部为12）
+    for (let i = 0; i < 12; i++) {
+      const angle = (i * 30 - 90) * Math.PI / 180;
+      const x = Math.cos(angle) * 85;
+      const y = Math.sin(angle) * 85;
+      const t = document.createElementNS(SVG_NS, 'text');
+      t.setAttribute('x', x); t.setAttribute('y', y);
+      t.setAttribute('font-size', i === 0 ? 18 : 15);
+      t.textContent = i === 0 ? 12 : i;
+      miniNumeralsG.appendChild(t);
+    }
+
+    let miniPrevSec = -1;
+    function updateMiniClock() {
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+      const ms = now.getMilliseconds();
+      const secAngle = (s + ms / 1000) * 6;
+      const minAngle = m * 6 + s * 0.1;
+      const hourAngle = (h % 12) * 30 + m * 0.5;
+      if (s !== miniPrevSec) {
+        miniSecond.style.transition = 'none';
+        miniSecond.setAttribute('transform', `rotate(${secAngle})`);
+        void miniSecond.getBBox();
+        miniSecond.style.transition = 'transform 0.15s cubic-bezier(0.4, 2.4, 0.5, 1)';
+        miniPrevSec = s;
+      } else {
+        miniSecond.setAttribute('transform', `rotate(${secAngle})`);
+      }
+      miniMinute.setAttribute('transform', `rotate(${minAngle})`);
+      miniHour.setAttribute('transform', `rotate(${hourAngle})`);
+    }
+    updateMiniClock();
+    setInterval(updateMiniClock, 1000);
+
+    // ============ 节日锚定：中华传统节日列表 ============
+    // 农历节日数据：[月, 日, 名称, 别称]
+    const LUNAR_FESTIVALS = [
+      [1, 1, '春节', '正月初一·岁首'],
+      [1, 15, '元宵节', '正月十五·上元'],
+      [2, 2, '龙抬头', '二月初二·春龙'],
+      [3, 3, '上巳节', '三月初三·修禊'],
+      [5, 5, '端午节', '五月初五·端阳'],
+      [6, 6, '天贶节', '六月初六·回娘'],
+      [7, 7, '七夕节', '七月初七·乞巧'],
+      [7, 15, '中元节', '七月十五·盂兰'],
+      [8, 15, '中秋节', '八月十五·团圆'],
+      [9, 9, '重阳节', '九月初九·登高'],
+      [10, 1, '寒衣节', '十月初一·祭祖'],
+      [10, 15, '下元节', '十月十五·水官'],
+      [12, 8, '腊八节', '腊月初八·佛成道'],
+      [12, 23, '小年', '腊月廿三·祭灶'],
+      [12, 30, '除夕', '腊月三十·岁除']
+    ];
+
+    function buildFestivalList(targetYear) {
+      const list = document.getElementById('festivalList');
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const baseYear = targetYear || currentYear;
+      const yGz = getYearGanZhi(baseYear);
+
+      // 更新年份显示
+      document.getElementById('fyYear').textContent = baseYear + '年';
+
+      // 干支月日用该年正月初一近似（简单展示用）
+      const mGz = getMonthGanZhi(new Date(baseYear, 1, 1));
+      const dGz = getDayGanZhi(new Date(baseYear, 1, 1));
+
+      list.innerHTML = '';
+      LUNAR_FESTIVALS.forEach(([m, d, name, alias]) => {
+        // 农历大写
+        const monthName = LUNAR_MONTH_PREFIX[m - 1];
+        const dayName = dayToChinese(d);
+        const lunarCn = yearToChinese(baseYear) + '年' + monthName + '月' + dayName + '日';
+
+        const item = document.createElement('div');
+        item.className = 'festival-item';
+        item.innerHTML =
+          `<div class="fi-row1">` +
+            `<span class="fi-name">${name}</span>` +
+            `<span class="fi-lunar-date">${alias}</span>` +
+          `</div>` +
+          `<div class="fi-row2">` +
+            `<div class="fi-cell">` +
+              `<span class="fi-cell-label">干支纪年</span>` +
+              `<span class="fi-cell-value">${yGz}年 · ${mGz}月 · ${dGz}日</span>` +
+            `</div>` +
+            `<div class="fi-cell">` +
+              `<span class="fi-cell-label">农历大写</span>` +
+              `<span class="fi-cell-value">${lunarCn}</span>` +
+            `</div>` +
+          `</div>`;
+        list.appendChild(item);
+      });
+    }
+
+    // ============ 年份切换：±50年限制 ============
+    let festivalYear = new Date().getFullYear();
+    const FESTIVAL_MIN_YEAR = festivalYear - 50;
+    const FESTIVAL_MAX_YEAR = festivalYear + 50;
+
+    function showFestivalToast(msg) {
+      const toast = document.getElementById('festivalToast');
+      toast.textContent = msg;
+      toast.hidden = false;
+      setTimeout(() => { toast.hidden = true; }, 2800);
+    }
+
+    function updateYearBtns() {
+      document.getElementById('fyPrev').disabled = festivalYear <= FESTIVAL_MIN_YEAR;
+      document.getElementById('fyNext').disabled = festivalYear >= FESTIVAL_MAX_YEAR;
+    }
+
+    document.getElementById('fyPrev').addEventListener('click', () => {
+      if (festivalYear <= FESTIVAL_MIN_YEAR) {
+        showFestivalToast('时间到此为止，无需过多赘述。\n若想查询，请在50年内进行查询即可。');
+        return;
+      }
+      festivalYear--;
+      buildFestivalList(festivalYear);
+      updateYearBtns();
+    });
+
+    document.getElementById('fyNext').addEventListener('click', () => {
+      if (festivalYear >= FESTIVAL_MAX_YEAR) {
+        showFestivalToast('时间到此为止，无需过多赘述。\n若想查询，请在50年内进行查询即可。');
+        return;
+      }
+      festivalYear++;
+      buildFestivalList(festivalYear);
+      updateYearBtns();
+    });
+
+    buildFestivalList(festivalYear);
+    updateYearBtns();
+
+    // ============ 弹窗通用：打开/关闭 ============
+    function openModal(id) {
+      document.getElementById(id).hidden = false;
+    }
+    function closeModal(id) {
+      document.getElementById(id).hidden = true;
+    }
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.addEventListener('click', () => closeModal(btn.dataset.close));
+    });
+    // 点击遮罩关闭
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m) m.hidden = true; });
+    });
+
+    // ============ 查 / 秘 按钮 ============
+    document.getElementById('btnQuery').addEventListener('click', () => openModal('modalQuery'));
+    document.getElementById('btnSecret').addEventListener('click', () => {
+      resetSecret();
+      openModal('modalSecret');
+    });
+
+    // ============ 查询逻辑 ============
+    // 时辰干支：根据时辰索引推算时干
+    function getHourGanZhi(hour) {
+      const dayGz = getDayGanZhi(new Date()); // 近似，精确需根据查询日期
+      const dayStemIdx = GAN.indexOf(dayGz[0]);
+      const shichenIdx = Math.floor(((hour + 1) % 24) / 2);
+      // 日干起时：甲己日起甲子时
+      const startIdx = dayStemIdx % 5;
+      const hourStemIdx = (startIdx * 2 + shichenIdx) % 10;
+      return GAN[hourStemIdx] + ZHI[shichenIdx];
+    }
+
+    // 根据指定日期计算时柱（精确）
+    function getHourGanZhiByDate(date) {
+      const dayGz = getDayGanZhi(date);
+      const dayStemIdx = GAN.indexOf(dayGz[0]);
+      const shichenIdx = Math.floor(((date.getHours() + 1) % 24) / 2);
+      const startIdx = dayStemIdx % 5;
+      const hourStemIdx = (startIdx * 2 + shichenIdx) % 10;
+      return GAN[hourStemIdx] + ZHI[shichenIdx];
+    }
+
+    // ============ 查询：阳历 / 公历 切换 ============
+    let queryMode = 'solar';
+    let lunarInputType = 'cn';
+
+    function switchQueryMode(mode) {
+      queryMode = mode;
+      document.querySelectorAll('.qf-tab').forEach(t => t.classList.toggle('is-active', t.dataset.mode === mode));
+      document.getElementById('formSolar').hidden = (mode !== 'solar');
+      document.getElementById('formLunar').hidden = (mode !== 'lunar');
+    }
+    document.querySelectorAll('.qf-tab').forEach(tab => {
+      tab.addEventListener('click', () => switchQueryMode(tab.dataset.mode));
+    });
+
+    // 公历子Tab：大写汉字 / 八字
+    document.querySelectorAll('.lunar-use-row .qst-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        lunarInputType = btn.dataset.lunarType;
+        document.querySelectorAll('.lunar-use-row .qst-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+      });
+    });
+
+    // ============ 拨动选择器 ============
+    // 数据源
+    const ROLLER_DATA = {
+      'cn-year': Array.from({length: 100}, (_, i) => { const y = 2000 + i; return {val: i, text: yearToChinese(y)}; }),
+      'cn-month': LUNAR_MONTH_PREFIX.map((p, i) => ({val: i, text: p + '月'})),
+      'cn-day': Array.from({length: 30}, (_, i) => ({val: i, text: dayToChinese(i + 1)})),
+      'cn-hour': ZHI.map((z, i) => ({val: i, text: z + '时'})),
+      'bazi': (() => {
+        const arr = [];
+        for (let i = 0; i < 60; i++) arr.push({val: i, text: GAN[i % 10] + ZHI[i % 12]});
+        return arr;
+      })()
+    };
+
+    const rollerStates = {};
+
+    function getRollerText(roller) {
+      const type = roller.dataset.type;
+      const val = parseInt(roller.dataset.val);
+      if (type && ROLLER_DATA[type]) {
+        const item = ROLLER_DATA[type].find(d => d.val === val);
+        return item ? item.text : String(val);
+      }
+      return String(val);
+    }
+
+    function buildRoller(roller) {
+      const id = roller.dataset.id;
+      const type = roller.dataset.type;
+      const min = parseInt(roller.dataset.min || 0);
+      const max = parseInt(roller.dataset.max || 0);
+      rollerStates[id] = { type, min, max, val: parseInt(roller.dataset.val) };
+
+      const upBtn = document.createElement('div');
+      upBtn.className = 'roller-btn';
+      upBtn.textContent = '▲';
+      const valBox = document.createElement('div');
+      valBox.className = 'roller-val';
+      valBox.textContent = getRollerText(roller);
+      const dnBtn = document.createElement('div');
+      dnBtn.className = 'roller-btn';
+      dnBtn.textContent = '▼';
+
+      roller.appendChild(upBtn);
+      roller.appendChild(valBox);
+      roller.appendChild(dnBtn);
+
+      const change = (delta) => {
+        const s = rollerStates[id];
+        if (s.type && ROLLER_DATA[s.type]) {
+          const arr = ROLLER_DATA[s.type];
+          let idx = arr.findIndex(d => d.val === s.val);
+          idx = (idx + delta + arr.length) % arr.length;
+          s.val = arr[idx].val;
+        } else {
+          s.val += delta;
+          if (s.val < s.min) s.val = s.max;
+          if (s.val > s.max) s.val = s.min;
+        }
+        valBox.textContent = getRollerText(roller);
+        roller.dataset.val = s.val;
+        valBox.classList.remove('changed');
+        void valBox.offsetWidth;
+        valBox.classList.add('changed');
+      };
+
+      upBtn.addEventListener('click', () => change(1));
+      dnBtn.addEventListener('click', () => change(-1));
+      // 滚轮支持
+      roller.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        change(e.deltaY < 0 ? 1 : -1);
+      }, { passive: false });
+    }
+
+    document.querySelectorAll('.roller').forEach(buildRoller);
+
+    function getRollerVal(id) {
+      return rollerStates[id] ? rollerStates[id].val : 0;
+    }
+
+    // ============ 农历转阳历 ============
+    function lunarToSolar(year, month, day, hour) {
+      if (!lunarInfo[year - 1900]) return null;
+      let days = 0;
+      const leapM = leapMonth(year);
+      for (let i = 1; i < month; i++) days += monthDays(year, i);
+      if (leapM > 0 && leapM < month) days += leapDays(year);
+      days += day - 1;
+      const result = new Date(1900, 0, 31);
+      result.setDate(result.getDate() + days);
+      result.setHours(hour || 12, 0, 0, 0);
+      return result;
+    }
+
+    // 八字 → 阳历（按年柱反推年，日柱遍历找日期）
+    function baziToSolar(yearGz, dayGz, hour) {
+      let year = 1984;
+      while (getYearGanZhi(year) !== yearGz && year < 2100) year++;
+      if (year >= 2100) return null;
+      if (!dayGz) return new Date(year, 5, 15, hour);
+      for (let mo = 0; mo < 12; mo++) {
+        for (let d = 1; d <= 28; d++) {
+          const dt = new Date(year, mo, d, hour);
+          if (getDayGanZhi(dt) === dayGz) return dt;
+        }
+      }
+      return new Date(year, 5, 15, hour);
+    }
+
+    // 显示查询结果
+    function showQueryResult(date) {
+      const yGz = getYearGanZhi(date.getFullYear());
+      const mGz = getMonthGanZhi(date);
+      const dGz = getDayGanZhi(date);
+      const hGz = getHourGanZhiByDate(date);
+      document.getElementById('qrBazi').textContent = `${yGz}年 ${mGz}月 ${dGz}日 ${hGz}时`;
+
+      const lunar = solarToLunar(date);
+      const leapPrefix = lunar.isLeap ? '闰' : '';
+      document.getElementById('qrLunar').textContent =
+        yearToChinese(lunar.year) + '年' + leapPrefix + LUNAR_MONTH_PREFIX[lunar.month - 1] + '月' + dayToChinese(lunar.day) + '日';
+
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('qrSolar').textContent =
+        `${date.getFullYear()}年${pad(date.getMonth()+1)}月${pad(date.getDate())}日 ${pad(date.getHours())}时`;
+
+      document.getElementById('queryResult').hidden = false;
+    }
+
+    // 阳历查询
+    document.getElementById('btnDoQuery').addEventListener('click', () => {
+      const y = getRollerVal('rollSY');
+      const mo = getRollerVal('rollSM');
+      const d = getRollerVal('rollSD');
+      const h = getRollerVal('rollSH');
+      const date = new Date(y, mo - 1, d, h, 0, 0);
+      showQueryResult(date);
+    });
+
+    // 公历查询
+    document.getElementById('btnDoQueryLunar').addEventListener('click', () => {
+      let date = null;
+      if (lunarInputType === 'cn') {
+        // 大写汉字：cn-year val=0..99 → 2000+val
+        const yIdx = getRollerVal('rollLY');
+        const mIdx = getRollerVal('rollLM');
+        const dIdx = getRollerVal('rollLD');
+        const hIdx = getRollerVal('rollLH');
+        const year = 2000 + yIdx;
+        const month = mIdx + 1;
+        const day = dIdx + 1;
+        const hour = hIdx * 2; // 子时=0, 丑时=2...
+        date = lunarToSolar(year, month, day, hour);
+      } else {
+        // 八字
+        const yIdx = getRollerVal('rollBY');
+        const dIdx = getRollerVal('rollBD');
+        const hIdx = getRollerVal('rollBH');
+        const yearGz = ROLLER_DATA.bazi[yIdx].text;
+        const dayGz = ROLLER_DATA.bazi[dIdx].text;
+        const hour = hIdx * 2;
+        date = baziToSolar(yearGz, dayGz, hour);
+      }
+      if (!date) { alert('无法解析，请调整选择'); return; }
+      showQueryResult(date);
+    });
+
+    // ============ 九宫格密码 ============
+    // 12时辰：子丑寅卯辰巳午未申酉戌亥（一行4个，三行）
+    const SECRET_CELLS = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+    // 密码序列：5位 酉→酉→酉→亥→寅
+    const SECRET_CODE = ['酉','酉','酉','亥','寅'];
+    let secretInput = [];
+
+    function buildSecretGrid() {
+      const grid = document.getElementById('secretGrid');
+      grid.innerHTML = '';
+      SECRET_CELLS.forEach(ch => {
+        const cell = document.createElement('div');
+        cell.className = 'sg-cell';
+        cell.textContent = ch;
+        cell.dataset.ch = ch;
+        cell.addEventListener('click', () => onSecretClick(cell, ch));
+        grid.appendChild(cell);
+      });
+      // 进度点（5个）
+      const progress = document.getElementById('secretProgress');
+      progress.innerHTML = '';
+      for (let i = 0; i < SECRET_CODE.length; i++) {
+        const dot = document.createElement('span');
+        dot.className = 'sp-dot';
+        progress.appendChild(dot);
+      }
+    }
+    buildSecretGrid();
+
+    function resetSecret() {
+      secretInput = [];
+      document.querySelectorAll('.sg-cell').forEach(c => c.classList.remove('selected', 'error'));
+      document.getElementById('secretError').hidden = true;
+      updateSecretProgress();
+    }
+
+    function updateSecretProgress() {
+      const dots = document.querySelectorAll('.sp-dot');
+      dots.forEach((d, i) => {
+        d.classList.toggle('filled', i < secretInput.length);
+      });
+    }
+
+    function showSecretError() {
+      const err = document.getElementById('secretError');
+      err.textContent = '您输的密码错误，此密码仅为至亲之人设计，其他人无法进入。';
+      err.hidden = false;
+    }
+
+    function onSecretClick(cell, ch) {
+      // 允许重复点击同一格（支持 酉酉酉 序列）
+      secretInput.push(ch);
+      cell.classList.add('selected');
+      updateSecretProgress();
+
+      const idx = secretInput.length - 1;
+      if (secretInput[idx] !== SECRET_CODE[idx]) {
+        // 错误
+        cell.classList.add('error');
+        showSecretError();
+        setTimeout(() => {
+          resetSecret();
+        }, 1500);
+        return;
+      }
+
+      if (secretInput.length === SECRET_CODE.length) {
+        // 密码正确
+        setTimeout(() => {
+          closeModal('modalSecret');
+          buildFamilyList();
+          openModal('modalFamily');
+        }, 400);
+      }
+    }
+
+    // ============ 家人生日数据 ============
+    // [关系, 姓名, 阳历年, 月, 日]
+    const FAMILY_DATA = [
+      ['父亲', '李文山', 1965, 3, 12],
+      ['母亲', '王秀英', 1968, 7, 25],
+      ['兄长', '李志远', 1990, 11, 8],
+      ['姐姐', '李雅芳', 1993, 5, 18],
+      ['本人', '李子墨', 1996, 8, 27],
+      ['妹妹', '李雨桐', 1999, 2, 14],
+      ['姐夫', '陈嘉伟', 1991, 9, 3],
+      ['侄女', '陈思颖', 2020, 12, 15]
+    ];
+
+    function buildFamilyList() {
+      const list = document.getElementById('familyList');
+      list.innerHTML = '';
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const thisYear = now.getFullYear();
+
+      FAMILY_DATA.forEach(([relation, name, y, m, d]) => {
+        const date = new Date(y, m - 1, d, 12, 0, 0);
+        const lunar = solarToLunar(date);
+        const leapPrefix = lunar.isLeap ? '闰' : '';
+        const lunarStr = yearToChinese(lunar.year) + '年' +
+          leapPrefix + LUNAR_MONTH_PREFIX[lunar.month - 1] + '月' +
+          dayToChinese(lunar.day) + '日';
+        const pad = n => String(n).padStart(2, '0');
+        const solarStr = `${y}年${pad(m)}月${pad(d)}日`;
+
+        // 倒计时：按今年阳历生日
+        const thisYearBirthday = new Date(thisYear, m - 1, d);
+        thisYearBirthday.setHours(0, 0, 0, 0);
+        let cdText, cdClass = '';
+        if (thisYearBirthday < now) {
+          cdText = '已过生日';
+          cdClass = 'is-past';
+        } else {
+          const diffDays = Math.round((thisYearBirthday - now) / (1000 * 60 * 60 * 24));
+          if (diffDays === 0) {
+            cdText = '今日生日';
+            cdClass = 'is-today';
+          } else if (diffDays <= 7) {
+            cdText = `距下次生日：${diffDays}天`;
+            cdClass = 'is-soon';
+          } else {
+            cdText = `距下次生日：${diffDays}天`;
+          }
+        }
+
+        const item = document.createElement('div');
+        item.className = 'family-item';
+        item.innerHTML =
+          `<div class="fi-relation">${relation}</div>` +
+          `<div class="fi-info">` +
+            `<div class="fi-name-row ${cdClass}">` +
+              `<span class="fi-name">${name}</span>` +
+              `<span class="fi-cd">　${cdText}</span>` +
+            `</div>` +
+            `<div class="fi-lunar">（阳历）${solarStr}</div>` +
+            `<div class="fi-lunar">（农历）${lunarStr}</div>` +
+          `</div>`;
+        list.appendChild(item);
+      });
+    }
+  </script>
+</body>
+</html>
