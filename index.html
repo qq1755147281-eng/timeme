@@ -201,9 +201,83 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: clamp(240px, 38vw, 440px);
+    width: clamp(320px, 92vw, 720px);  /* 加宽：左右留出空间给两侧竖排节日文字，不紧贴钟表 */
     height: clamp(240px, 38vw, 440px);
     margin: 8px 0;
+  }
+  /* === 钟表两侧：中华节日（左）/ 佛教道教节日（右）竖排呼吸灯 === */
+  .side-fest {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: auto;
+    max-width: 28%;
+    min-height: 80%;
+  }
+  .side-fest-left {
+    /* 距钟表左边缘 7%～10% 的距离，不贴钟、不贴页边 */
+    left: 1%;
+    flex-direction: row;
+  }
+  .side-fest-right {
+    right: 1%;
+    flex-direction: row;
+  }
+  .side-fest .sf-item {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1.25;
+    letter-spacing: 0.16em;
+    color: #ffe9a8;
+    padding: 8px 6px;
+    border-radius: 10px;
+    background: rgba(20, 14, 40, 0.28);
+    border: 1px solid rgba(255, 215, 130, 0.28);
+    backdrop-filter: blur(3px);
+    animation: sfBreath 2.6s ease-in-out infinite;
+    white-space: nowrap;
+    margin-inline: clamp(6px, 2.2vw, 14px);
+  }
+  .side-fest-left .sf-item { text-align: center; margin-left: clamp(2px, 0.8vw, 6px); }
+  .side-fest-right .sf-item { text-align: center; margin-right: clamp(2px, 0.8vw, 6px); }
+  .side-fest .sf-item .sf-cat {
+    display: block;
+    font-weight: 400;
+    font-size: 10px;
+    opacity: 0.78;
+    letter-spacing: 0.2em;
+    padding-bottom: 0.6em;
+    color: #ffd966;
+  }
+  .sf-item[data-src="cn"]       { color: #fff4c2; text-shadow: 0 0 8px rgba(255, 215, 130, 0.55); }
+  .sf-item[data-src="buddhist"] { color: #ffd9b8; text-shadow: 0 0 8px rgba(255, 175, 110, 0.55); }
+  .sf-item[data-src="taoist"]   { color: #c8e8ff; text-shadow: 0 0 8px rgba(135, 185, 255, 0.55); }
+  @keyframes sfBreath {
+    0%   { opacity: 0.72; box-shadow: 0 0 4px rgba(255, 215, 130, 0.18); }
+    40%  { opacity: 1;    box-shadow: 0 0 14px rgba(255, 215, 130, 0.62), 0 0 24px rgba(255, 195, 80, 0.32); }
+    60%  { opacity: 1;    box-shadow: 0 0 14px rgba(255, 215, 130, 0.62), 0 0 24px rgba(255, 195, 80, 0.32); }
+    100% { opacity: 0.72; box-shadow: 0 0 4px rgba(255, 215, 130, 0.18); }
+  }
+  .side-fest .sf-item:nth-child(1) { animation-delay: 0s; }
+  .side-fest .sf-item:nth-child(2) { animation-delay: 0.9s; }
+  .side-fest .sf-item:nth-child(3) { animation-delay: 1.8s; }
+  @media (max-width: 520px) {
+    .side-fest { max-width: 30%; }
+    .side-fest .sf-item { font-size: 11px; letter-spacing: 0.14em; padding: 6px 4px; }
+    .side-fest .sf-item .sf-cat { font-size: 9px; }
+  }
+  @media (max-height: 620px) {
+    .side-fest .sf-item { font-size: 10px; letter-spacing: 0.12em; padding: 5px 4px; }
+    .side-fest .sf-item .sf-cat { font-size: 8.5px; }
   }
 
   .orbit-ring {
@@ -689,7 +763,7 @@
     .stage { padding: 14px 12px 10px; gap: 12px; }
     .lunar-panel { padding: 18px 18px 20px; }
     .clock-wrap { width: clamp(180px, 48vw, 260px); height: clamp(180px, 48vw, 260px); margin: 4px 0; }
-    .clock-orbit-wrap { width: clamp(200px, 54vw, 300px); height: clamp(200px, 54vw, 300px); margin: 4px 0; }
+    .clock-orbit-wrap { width: clamp(260px, 96vw, 520px); height: clamp(200px, 54vw, 300px); margin: 4px 0; }
     .solar-head .label, .solar-head .tag { font-size: 11px; }
     .lunar-time { font-size: clamp(18px, 4.5vw, 24px); }
   }
@@ -700,7 +774,7 @@
     .lunar-panel { padding: 16px 24px 18px; }
     .solar { padding: 16px 24px 18px; }
     .clock-wrap { width: clamp(160px, 26vw, 280px); height: clamp(160px, 26vw, 280px); margin: 4px 0; }
-    .clock-orbit-wrap { width: clamp(180px, 30vw, 320px); height: clamp(180px, 30vw, 320px); margin: 4px 0; }
+    .clock-orbit-wrap { width: clamp(320px, 86vw, 640px); height: clamp(180px, 30vw, 320px); margin: 4px 0; }
     .lunar-head { margin-bottom: 10px; }
     .solar { gap: 8px; }
   }
@@ -792,6 +866,8 @@
     height: clamp(220px, 36vw, 340px);
     margin: 8px 0 4px;
     animation: miniClockFloat 6s ease-in-out infinite;
+    position: relative;
+    cursor: pointer;
   }
 
   .mini-clock {
@@ -823,6 +899,95 @@
     stroke-width: 1;
     opacity: 0.5;
   }
+  /* 生日小钟表外环：12时辰文字（顺时针旋转 + 呼吸灯） */
+  .mini-shichen-text {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 20px;
+    fill: #ffe9a8;
+    text-anchor: middle;
+    dominant-baseline: central;
+    filter: drop-shadow(0 0 4px rgba(255, 215, 130, 0.9))
+            drop-shadow(0 0 10px rgba(255, 195, 80, 0.6));
+    animation: miniShichenBreath 2.2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes miniShichenBreath {
+    0%, 100% { opacity: 0.6; }
+    50%      { opacity: 1; }
+  }
+
+  /* ===== 12时辰→中心点 闪电层 ===== */
+  .mini-clock-lightning {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 6;
+    overflow: visible;
+  }
+  .mini-clock-lightning path,
+  .mini-clock-lightning polyline {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px currentColor) drop-shadow(0 0 10px currentColor);
+    animation: miniLightningFade 0.5s ease-out forwards;
+  }
+  @keyframes miniLightningFade {
+    0%   { opacity: 0; }
+    15%  { opacity: 1; }
+    30%  { opacity: 0.25; }
+    45%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  /* ===== 中心圆点爆炸 ===== */
+  .mini-center-dot-group {
+    transform-origin: center;
+    transform-box: fill-box;
+    transition: opacity 0.2s;
+  }
+  .mini-center-dot-group.exploding {
+    animation: centerDotExplode 0.45s ease-out forwards;
+  }
+  @keyframes centerDotExplode {
+    0%   { transform: scale(1); opacity: 1; }
+    40%  { transform: scale(3); opacity: 0.9; }
+    100% { transform: scale(3.5); opacity: 0; }
+  }
+
+  /* ===== 爆炸后4个金色汉字 ===== */
+  .mini-explode-char {
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 24px;
+    fill: #ffe9a8;
+    text-anchor: middle;
+    dominant-baseline: central;
+    filter: drop-shadow(0 0 6px rgba(255, 215, 130, 0.95))
+            drop-shadow(0 0 16px rgba(255, 195, 80, 0.75));
+    opacity: 0;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .mini-explode-char.show {
+    animation: explodeCharIn 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+  }
+  @keyframes explodeCharIn {
+    0%   { opacity: 0; transform: scale(0.2); }
+    60%  { opacity: 1; transform: scale(1.15); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .mini-explode-char.hide {
+    animation: explodeCharOut 0.3s ease-in forwards;
+  }
+  @keyframes explodeCharOut {
+    0%   { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.3); }
+  }
+
 
   .birthday-label {
     font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
@@ -852,6 +1017,57 @@
     justify-content: flex-start;
     padding: 16px 20px;
     gap: 12px;
+  }
+
+  /* 分类按钮栏：页面最顶部一排 */
+  .festival-cat-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 4px 4px 2px;
+    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .fc-btn {
+    position: relative;
+    flex: 0 0 auto;
+    padding: 7px 20px;
+    background: rgba(20, 14, 40, 0.55);
+    border: 1.3px solid rgba(255, 215, 130, 0.35);
+    border-radius: 999px;
+    color: rgba(255, 233, 168, 0.86);
+    font-family: "STKaiti", "KaiTi", "楷体", "Noto Serif SC", serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.18em;
+    cursor: pointer;
+    transition: all 0.28s ease;
+    text-shadow: 0 0 8px rgba(255, 215, 130, 0.4);
+    backdrop-filter: blur(4px);
+    max-width: 33.333%;
+    white-space: nowrap;
+  }
+  .fc-btn:hover {
+    border-color: rgba(255, 217, 102, 0.8);
+    color: #ffe9a8;
+    box-shadow: 0 0 12px rgba(255, 215, 130, 0.32);
+    transform: translateY(-1px);
+  }
+  /* 选中：黄色发光边框 */
+  .fc-btn.is-active {
+    border-color: #ffd966;
+    color: #fff4c2;
+    background: rgba(255, 215, 130, 0.12);
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.9), 0 0 20px rgba(255, 195, 80, 0.65);
+    box-shadow:
+      0 0 0 1px rgba(255, 217, 102, 0.85),
+      0 0 10px rgba(255, 215, 130, 0.8),
+      0 0 22px rgba(255, 195, 80, 0.5),
+      inset 0 0 8px rgba(255, 215, 130, 0.22);
   }
 
   .festival-head-bar {
@@ -983,6 +1199,35 @@
     border-color: rgba(255, 215, 130, 0.5);
     background: rgba(40, 28, 70, 0.5);
     box-shadow: 0 0 16px rgba(255, 215, 130, 0.2);
+  }
+  /* 临近节日：提前 3 天 ~ 当天 卡片边框黄色持续发光（呼吸） */
+  .festival-item.is-upcoming {
+    border: 1.6px solid #ffd966;
+    background: linear-gradient(180deg, rgba(255, 215, 130, 0.08), rgba(20, 14, 40, 0.42));
+    animation: fiBorderGlow 2.2s ease-in-out infinite;
+  }
+  .festival-item.is-upcoming::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 8px;
+    pointer-events: none;
+    border: 1px solid transparent;
+    box-shadow:
+      0 0 0 1px rgba(255, 217, 102, 0.85),
+      0 0 10px rgba(255, 215, 130, 0.9),
+      0 0 22px rgba(255, 195, 80, 0.75);
+    animation: fiBorderPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes fiBorderGlow {
+    0%   { border-color: rgba(255, 217, 102, 0.78); }
+    50%  { border-color: #fff4a8; }
+    100% { border-color: rgba(255, 217, 102, 0.78); }
+  }
+  @keyframes fiBorderPulse {
+    0%   { opacity: 0.72; box-shadow: 0 0 0 1px rgba(255, 217, 102, 0.78), 0 0 8px rgba(255, 215, 130, 0.7), 0 0 18px rgba(255, 195, 80, 0.55); }
+    50%  { opacity: 1;    box-shadow: 0 0 0 1px rgba(255, 230, 160, 1),   0 0 14px rgba(255, 215, 130, 0.95), 0 0 28px rgba(255, 195, 80, 0.8); }
+    100% { opacity: 0.72; box-shadow: 0 0 0 1px rgba(255, 217, 102, 0.78), 0 0 8px rgba(255, 215, 130, 0.7), 0 0 18px rgba(255, 195, 80, 0.55); }
   }
 
   .fi-row1 {
@@ -1386,10 +1631,76 @@
     margin-top: 0;
   }
 
-  .lunar-use-row {
-    display: flex;
-    gap: 8px;
-    margin: 12px 0 0;
+  .lunar-block {
+    padding: 8px 8px 10px;
+    border: 1px solid rgba(255, 215, 130, 0.22);
+    border-radius: 10px;
+    background: rgba(255, 215, 130, 0.035);
+  }
+  .lunar-block-title {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff3c4;
+    letter-spacing: 0.12em;
+    text-align: center;
+    margin-bottom: 6px;
+    text-shadow: 0 0 6px rgba(255, 215, 130, 0.5);
+  }
+  .lunar-block-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 130, 0.35), transparent);
+    margin: 8px 0;
+  }
+  .qf-submit.small {
+    padding: 10px 48px;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    width: 70%;
+    margin: 4px auto 0;
+    display: block;
+  }
+
+  /* 公历Tab内的拨动器整体小一号，保证一行显示 */
+  #formLunar .roller-row {
+    gap: 2px;
+    margin-bottom: 4px;
+    flex-wrap: nowrap;
+  }
+  #formLunar .roller-btn {
+    width: 24px;
+    height: 18px;
+    font-size: 10px;
+  }
+  #formLunar .roller-val {
+    width: 44px;
+    height: 30px;
+    font-size: 12px;
+    margin: 2px 0;
+  }
+  #formLunar .qf-unit {
+    font-size: 12px;
+    margin-right: 2px;
+  }
+  /* 公历Tab整体向上收紧 */
+  #formLunar {
+    gap: 4px !important;
+  }
+  #formLunar .lunar-block-divider {
+    margin: 4px 0;
+  }
+  #formLunar .query-result {
+    margin-top: 10px;
+    padding-top: 10px;
+    gap: 10px;
+  }
+  #formLunar .qr-title {
+    font-size: 12px;
+    letter-spacing: 0.15em;
+  }
+  #formLunar .qr-content {
+    font-size: 16px;
+    letter-spacing: 0.12em;
   }
 
   .qf-unit {
@@ -1696,6 +2007,10 @@
 
     <!-- 雷电金钟 + 外围三层圆环 -->
     <div class="clock-orbit-wrap">
+      <!-- 钟表左侧：中华节日（竖排，呼吸灯） -->
+      <div class="side-fest side-fest-left" id="sideFestLeft" aria-hidden="true"></div>
+      <!-- 钟表右侧：佛教节日 + 道教节日（竖排，呼吸灯） -->
+      <div class="side-fest side-fest-right" id="sideFestRight" aria-hidden="true"></div>
       <!-- 最外环：66点 逆时针 -->
       <svg class="orbit-ring orbit-outer-ccw" viewBox="-160 -160 320 320" aria-hidden="true">
         <g class="orbit-dots" id="orbitDots3"></g>
@@ -1859,7 +2174,7 @@
         <button class="qf-tab" type="button" data-mode="lunar" id="tabLunar">公历</button>
       </div>
 
-      <!-- 阳历拨动选择器 -->
+      <!-- 阳历Tab：只显示 年月日时 拨动 + 查询 + 结果 -->
       <div class="query-form" id="formSolar">
         <div class="roller-row">
           <div class="roller" data-id="rollSY" data-min="1900" data-max="2099" data-val="2000"></div>
@@ -1872,56 +2187,74 @@
           <span class="qf-unit">时</span>
         </div>
         <button class="qf-submit" type="button" id="btnDoQuery">查询</button>
+
+        <!-- 结果：阳历tab专属 -->
+        <div class="query-result" id="queryResultSolar" hidden>
+          <div class="qr-section">
+            <div class="qr-title">生辰八字</div>
+            <div class="qr-content qr-one-line" id="qrBaziS">—</div>
+          </div>
+          <div class="qr-section">
+            <div class="qr-title">阳历</div>
+            <div class="qr-content qr-one-line" id="qrSolarS">—</div>
+          </div>
+          <div class="qr-section">
+            <div class="qr-title">农历大写</div>
+            <div class="qr-content qr-one-line" id="qrLunarS">—</div>
+          </div>
+        </div>
       </div>
 
-      <!-- 公历拨动选择器（大写汉字 + 八字） -->
+      <!-- 公历Tab：大写汉字块+八字块+各自查询+结果 -->
       <div class="query-form" id="formLunar" hidden>
-        <!-- 大写汉字 -->
-        <div class="lunar-section-label">大写汉字</div>
-        <div class="roller-row">
-          <div class="roller" data-id="rollLY" data-type="cn-year" data-val="25"></div>
-          <span class="qf-unit">年</span>
-          <div class="roller" data-id="rollLM" data-type="cn-month" data-val="0"></div>
-          <span class="qf-unit">月</span>
-          <div class="roller" data-id="rollLD" data-type="cn-day" data-val="0"></div>
-          <span class="qf-unit">日</span>
-          <div class="roller" data-id="rollLH" data-type="cn-hour" data-val="6"></div>
-          <span class="qf-unit">时</span>
+        <!-- 大写汉字 独立块 -->
+        <div class="lunar-block">
+          <div class="lunar-block-title">大写汉字</div>
+          <div class="roller-row">
+            <div class="roller" data-id="rollLY" data-type="cn-year" data-val="25"></div>
+            <span class="qf-unit">年</span>
+            <div class="roller" data-id="rollLM" data-type="cn-month" data-val="0"></div>
+            <span class="qf-unit">月</span>
+            <div class="roller" data-id="rollLD" data-type="cn-day" data-val="0"></div>
+            <span class="qf-unit">日</span>
+            <div class="roller" data-id="rollLH" data-type="cn-hour" data-val="6"></div>
+            <span class="qf-unit">时</span>
+          </div>
+          <button class="qf-submit small" type="button" id="btnDoQueryCn">查询</button>
         </div>
 
-        <!-- 生辰八字 -->
-        <div class="lunar-section-label">生辰八字 · 天干地支</div>
-        <div class="roller-row">
-          <div class="roller" data-id="rollBY" data-type="bazi" data-val="0"></div>
-          <span class="qf-unit">年柱</span>
-          <div class="roller" data-id="rollBM" data-type="bazi" data-val="0"></div>
-          <span class="qf-unit">月柱</span>
-          <div class="roller" data-id="rollBD" data-type="bazi" data-val="0"></div>
-          <span class="qf-unit">日柱</span>
-          <div class="roller" data-id="rollBH" data-type="bazi" data-val="0"></div>
-          <span class="qf-unit">时柱</span>
+        <div class="lunar-block-divider"></div>
+
+        <!-- 生辰八字 独立块 -->
+        <div class="lunar-block">
+          <div class="lunar-block-title">生辰八字 · 天干地支</div>
+          <div class="roller-row">
+            <div class="roller" data-id="rollBY" data-type="bazi" data-val="0"></div>
+            <span class="qf-unit">年柱</span>
+            <div class="roller" data-id="rollBM" data-type="bazi" data-val="0"></div>
+            <span class="qf-unit">月柱</span>
+            <div class="roller" data-id="rollBD" data-type="bazi" data-val="0"></div>
+            <span class="qf-unit">日柱</span>
+            <div class="roller" data-id="rollBH" data-type="bazi" data-val="0"></div>
+            <span class="qf-unit">时柱</span>
+          </div>
+          <button class="qf-submit small" type="button" id="btnDoQueryBazi">查询</button>
         </div>
 
-        <div class="lunar-use-row">
-          <button class="qst-btn is-active" type="button" data-lunar-type="cn" id="lstCn">用大写汉字查询</button>
-          <button class="qst-btn" type="button" data-lunar-type="bazi" id="lstBazi">用生辰八字查询</button>
-        </div>
-        <button class="qf-submit" type="button" id="btnDoQueryLunar">查询</button>
-      </div>
-
-      <!-- 查询结果：始终显示三项 -->
-      <div class="query-result" id="queryResult" hidden>
-        <div class="qr-section">
-          <div class="qr-title">生辰八字</div>
-          <div class="qr-content qr-one-line" id="qrBazi">—</div>
-        </div>
-        <div class="qr-section">
-          <div class="qr-title">农历大写</div>
-          <div class="qr-content qr-one-line" id="qrLunar">—</div>
-        </div>
-        <div class="qr-section">
-          <div class="qr-title">阳历</div>
-          <div class="qr-content qr-one-line" id="qrSolar">—</div>
+        <!-- 结果：公历tab专属 -->
+        <div class="query-result" id="queryResultLunar" hidden>
+          <div class="qr-section">
+            <div class="qr-title">生辰八字</div>
+            <div class="qr-content qr-one-line" id="qrBaziL">—</div>
+          </div>
+          <div class="qr-section">
+            <div class="qr-title">阳历</div>
+            <div class="qr-content qr-one-line" id="qrSolarL">—</div>
+          </div>
+          <div class="qr-section">
+            <div class="qr-title">农历大写</div>
+            <div class="qr-content qr-one-line" id="qrLunarL">—</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1973,6 +2306,12 @@
       <span class="label">节庆锚定 · Festival</span>
       <span class="festival-sub-label">中华上下五千年 · 节庆纪元</span>
     </div>
+    <!-- 分类按钮：中华节日 / 佛教节日 / 道教节日（标题栏下方） -->
+    <div class="festival-cat-bar">
+      <button class="fc-btn is-active" type="button" data-cat="cn">中华节日</button>
+      <button class="fc-btn" type="button" data-cat="buddhist">佛教节日</button>
+      <button class="fc-btn" type="button" data-cat="taoist">道教节日</button>
+    </div>
     <div class="festival-year-bar">
       <button class="fy-btn" type="button" id="fyPrev">上一年</button>
       <span class="fy-year" id="fyYear">—</span>
@@ -2017,6 +2356,66 @@
   </nav>
 
   <script>
+    // ============ 音效管理器（Web Audio API 合成，无需外部文件） ============
+    const SoundFX = (function () {
+      let ctx = null;
+      let muted = false;
+      function ac() {
+        if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
+        return ctx;
+      }
+      function tone(freq, dur, type, vol, delay) {
+        if (muted) return;
+        const c = ac();
+        const t0 = c.currentTime + (delay || 0);
+        const osc = c.createOscillator();
+        const g = c.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        g.gain.setValueAtTime(0, t0);
+        g.gain.linearRampToValueAtTime(vol || 0.12, t0 + 0.008);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        osc.connect(g); g.connect(c.destination);
+        osc.start(t0); osc.stop(t0 + dur + 0.02);
+      }
+      function noise(dur, vol, delay) {
+        if (muted) return;
+        const c = ac();
+        const t0 = c.currentTime + (delay || 0);
+        const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+        const src = c.createBufferSource();
+        const g = c.createGain();
+        const f = c.createBiquadFilter();
+        f.type = 'highpass'; f.frequency.value = 2000;
+        g.gain.setValueAtTime(vol || 0.06, t0);
+        g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+        src.buffer = buf; src.connect(f); f.connect(g); g.connect(c.destination);
+        src.start(t0);
+      }
+      return {
+        nav()       { tone(523.25, 0.18, 'sine', 0.13); tone(659.25, 0.24, 'sine', 0.10, 0.06); },
+        click()     { tone(880, 0.05, 'square', 0.05); noise(0.03, 0.03); },
+        tab()       { tone(1318.5, 0.05, 'triangle', 0.09); tone(1760, 0.04, 'triangle', 0.06, 0.025); },
+        confirm()   { tone(523.25, 0.10, 'sine', 0.12); tone(659.25, 0.10, 'sine', 0.12, 0.08); tone(783.99, 0.16, 'sine', 0.12, 0.16); },
+        error()     { tone(196, 0.16, 'sawtooth', 0.10); tone(146.83, 0.22, 'sawtooth', 0.08, 0.10); },
+        unlock()    { tone(523.25, 0.35, 'sine', 0.13); tone(659.25, 0.35, 'sine', 0.13, 0.06); tone(783.99, 0.35, 'sine', 0.13, 0.12); tone(1046.5, 0.45, 'sine', 0.11, 0.18); },
+        roller()    { tone(1200, 0.025, 'square', 0.04); noise(0.02, 0.025); },
+        modalOpen() { tone(440, 0.18, 'sine', 0.10); tone(554.37, 0.24, 'sine', 0.08, 0.05); },
+        modalClose(){ tone(554.37, 0.14, 'sine', 0.08); tone(440, 0.20, 'sine', 0.06, 0.05); },
+        festival()  { tone(880, 0.14, 'sine', 0.10); tone(1108.73, 0.18, 'sine', 0.08, 0.07); },
+        secret()    { tone(622.25, 0.10, 'triangle', 0.09); },
+        year()      { tone(392, 0.08, 'triangle', 0.08); tone(523.25, 0.06, 'triangle', 0.06, 0.04); },
+        setMuted(v) { muted = !!v; },
+        isMuted()   { return muted; },
+        resumeCtx() { try { ac(); } catch (e) {} }
+      };
+    })();
+    document.addEventListener('pointerdown', function once() { SoundFX.resumeCtx(); document.removeEventListener('pointerdown', once); }, { once: true });
+    document.addEventListener('keydown', function once() { SoundFX.resumeCtx(); document.removeEventListener('keydown', once); }, { once: true });
+
     // ============ 钟表初始化 ============
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const SHICHEN = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
@@ -2443,9 +2842,116 @@
     const stageFestival = document.getElementById('stageFestival');
     const allStages = [stageTime, stageBirthday, stageFestival];
 
+    let lightningTimer = null;
+    function stopLightning() {
+      if (lightningTimer) { clearTimeout(lightningTimer); lightningTimer = null; }
+    }
+    // 生成惊天霹雳闪电（折线锯齿 + 分叉）
+    function spawnLightning() {
+      const stage = document.getElementById('stageBirthday');
+      if (stage.hidden) return;
+      const layer = document.getElementById('lightningLayer');
+      const card = document.querySelector('#stageBirthday .birthday-card');
+      const clock = document.querySelector('#stageBirthday .mini-clock-wrap');
+      const btnQ = document.getElementById('btnQuery');
+      const btnS = document.getElementById('btnSecret');
+      if (!layer || !clock || !btnQ || !btnS) return;
+
+      const cardRect = card.getBoundingClientRect();
+      const clockRect = clock.getBoundingClientRect();
+      // 起电点：钟表中心相对 card 的坐标
+      const sx = clockRect.left - cardRect.left + clockRect.width / 2;
+      const sy = clockRect.top - cardRect.top + clockRect.height / 2;
+
+      // 1~2 条闪电随机射向查 / 秘
+      const count = Math.random() < 0.5 ? 1 : 2;
+      const targets = [btnQ, btnS];
+      const used = new Set();
+      for (let i = 0; i < count; i++) {
+        let tgt;
+        let tries = 0;
+        do {
+          tgt = targets[Math.floor(Math.random() * targets.length)];
+          tries++;
+        } while (used.has(tgt) && tries < 3);
+        used.add(tgt);
+
+        const r2 = tgt.getBoundingClientRect();
+        // 落点：按钮中心附近随机偏移
+        const ex = r2.left - cardRect.left + r2.width / 2 + (Math.random() - 0.5) * r2.width * 0.6;
+        const ey = r2.top - cardRect.top + r2.height / 2 + (Math.random() - 0.5) * r2.height * 0.6;
+
+        // 颜色：70%金黄 / 30%紫色
+        const color = Math.random() < 0.7 ? '#ffd966' : (Math.random() < 0.5 ? '#c084fc' : '#a855f7');
+        const strokeW = (Math.random() * 1.5 + 1.8).toFixed(2);
+
+        // 主闪电：折线锯齿
+        const segs = 7 + Math.floor(Math.random() * 5);
+        const points = [];
+        points.push([sx, sy]);
+        let curX = sx, curY = sy;
+        for (let j = 1; j < segs; j++) {
+          const t = j / segs;
+          const baseX = sx + (ex - sx) * t;
+          const baseY = sy + (ey - sy) * t;
+          // 垂直于主方向的随机偏移
+          const dx = ex - sx, dy = ey - sy;
+          const len = Math.hypot(dx, dy) || 1;
+          const nx = -dy / len, ny = dx / len;
+          const offset = (Math.random() - 0.5) * Math.min(40, len * 0.12);
+          curX = baseX + nx * offset + (Math.random() - 0.5) * 6;
+          curY = baseY + ny * offset + (Math.random() - 0.5) * 6;
+          points.push([curX, curY]);
+        }
+        points.push([ex, ey]);
+
+        const mainStr = points.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+        const main = document.createElementNS(SVG_NS, 'polyline');
+        main.setAttribute('points', mainStr);
+        main.setAttribute('stroke', color);
+        main.setAttribute('stroke-width', strokeW);
+        main.style.color = color;
+        layer.appendChild(main);
+
+        // 2~4 条小分叉（从随机中间点射出）
+        const forkN = 2 + Math.floor(Math.random() * 3);
+        for (let k = 0; k < forkN; k++) {
+          const idx = 1 + Math.floor(Math.random() * (points.length - 2));
+          const fp = points[idx];
+          const ang = Math.random() * Math.PI * 2;
+          const fLen = 8 + Math.random() * 24;
+          const fx = fp[0] + Math.cos(ang) * fLen;
+          const fy = fp[1] + Math.sin(ang) * fLen;
+          // 分叉加 1 个中间偏移
+          const mx = (fp[0] + fx) / 2 + (Math.random() - 0.5) * 8;
+          const my = (fp[1] + fy) / 2 + (Math.random() - 0.5) * 8;
+          const forkStr = `${fp[0].toFixed(1)},${fp[1].toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)} ${fx.toFixed(1)},${fy.toFixed(1)}`;
+          const fork = document.createElementNS(SVG_NS, 'polyline');
+          fork.setAttribute('points', forkStr);
+          fork.setAttribute('stroke', color);
+          fork.setAttribute('stroke-width', (parseFloat(strokeW) * 0.55).toFixed(2));
+          fork.style.color = color;
+          layer.appendChild(fork);
+          setTimeout(() => fork.remove(), 520);
+        }
+
+        setTimeout(() => main.remove(), 520);
+      }
+
+      // 下次闪电：1.2 ~ 2.3 秒随机
+      const nextDelay = 1200 + Math.floor(Math.random() * 1100);
+      lightningTimer = setTimeout(spawnLightning, nextDelay);
+    }
+    function startLightning() {
+      stopLightning();
+      lightningTimer = setTimeout(spawnLightning, 900);
+    }
+
     function showStage(target) {
       allStages.forEach(s => { if (s) s.hidden = true; });
       if (target) target.hidden = false;
+      if (target === stageBirthday) startLightning();
+      else stopLightning();
     }
 
     document.querySelectorAll('.anchor-btn').forEach(btn => {
@@ -2455,6 +2961,7 @@
         btn.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
       });
       btn.addEventListener('click', () => {
+        SoundFX.nav();
         document.querySelectorAll('.anchor-btn').forEach(b => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         const anchor = btn.dataset.anchor;
@@ -2497,6 +3004,187 @@
       miniNumeralsG.appendChild(t);
     }
 
+    // ============ 生日小钟表外环：12时辰顺时针旋转 ============
+    const miniShichenG = document.createElementNS(SVG_NS, 'g');
+    miniShichenG.setAttribute('id', 'miniShichen');
+    document.querySelector('.mini-clock').appendChild(miniShichenG);
+    const MINI_SHICHEN_R = 138;
+    const miniShichenItems = [];
+    for (let i = 0; i < 12; i++) {
+      const t = document.createElementNS(SVG_NS, 'text');
+      t.setAttribute('class', 'mini-shichen-text');
+      t.textContent = SHICHEN[i];
+      miniShichenG.appendChild(t);
+      miniShichenItems.push({ el: t, baseAngle: i * 30, x: 0, y: 0, cooldownUntil: 0 });
+    }
+    let _miniShichenAngle = 0;
+    function _animateMiniShichen() {
+      _miniShichenAngle += 0.12;
+      if (_miniShichenAngle >= 360) _miniShichenAngle -= 360;
+      miniShichenItems.forEach(function (item) {
+        const a = (item.baseAngle + _miniShichenAngle - 90) * Math.PI / 180;
+        item.x = Math.cos(a) * MINI_SHICHEN_R;
+        item.y = Math.sin(a) * MINI_SHICHEN_R;
+        item.el.setAttribute('x', item.x);
+        item.el.setAttribute('y', item.y);
+      });
+      requestAnimationFrame(_animateMiniShichen);
+    }
+    _animateMiniShichen();
+
+    // ============ 12时辰→中心点 闪电 + 爆炸系统 ============
+    const LIGHTNING_COLORS = ['#ff4444', '#ffd966', '#c084fc']; // 红 / 黄 / 紫
+    // 创建闪电层SVG
+    const miniLightningLayer = document.createElementNS(SVG_NS, 'svg');
+    miniLightningLayer.setAttribute('class', 'mini-clock-lightning');
+    miniLightningLayer.setAttribute('id', 'miniClockLightning');
+    miniLightningLayer.setAttribute('viewBox', '-150 -150 300 300');
+    document.querySelector('.mini-clock-wrap').appendChild(miniLightningLayer);
+
+    // 从(fromX,fromY)向中心点(0,0)发射一道锯齿闪电
+    function fireMiniLightning(fromX, fromY, color) {
+      const toX = 0, toY = 0;
+      const segs = 5 + Math.floor(Math.random() * 4);
+      const points = [];
+      points.push([fromX, fromY]);
+      for (let j = 1; j < segs; j++) {
+        const t = j / segs;
+        const baseX = fromX + (toX - fromX) * t;
+        const baseY = fromY + (toY - fromY) * t;
+        const dx = toX - fromX, dy = toY - fromY;
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len, ny = dx / len;
+        const offset = (Math.random() - 0.5) * Math.min(22, len * 0.16);
+        points.push([baseX + nx * offset + (Math.random() - 0.5) * 5,
+                     baseY + ny * offset + (Math.random() - 0.5) * 5]);
+      }
+      points.push([toX, toY]);
+      const pointsStr = points.map(function (p) { return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join(' ');
+      const poly = document.createElementNS(SVG_NS, 'polyline');
+      poly.setAttribute('points', pointsStr);
+      poly.setAttribute('stroke', color);
+      poly.setAttribute('stroke-width', (1.4 + Math.random() * 1.4).toFixed(2));
+      poly.style.color = color;
+      miniLightningLayer.appendChild(poly);
+      setTimeout(function () { poly.remove(); }, 520);
+    }
+
+    // 随机选一个不在冷却中的时辰字
+    function pickRandomShichen() {
+      const now = Date.now();
+      const avail = miniShichenItems.filter(function (it) { return now > it.cooldownUntil; });
+      if (avail.length === 0) return null;
+      return avail[Math.floor(Math.random() * avail.length)];
+    }
+
+    // 从随机字发射一道闪电，并设置1秒冷却
+    function fireFromRandomShichen() {
+      const item = pickRandomShichen();
+      if (!item) return false;
+      const color = LIGHTNING_COLORS[Math.floor(Math.random() * LIGHTNING_COLORS.length)];
+      fireMiniLightning(item.x, item.y, color);
+      item.cooldownUntil = Date.now() + 1000;
+      return true;
+    }
+
+    // 自动闪电：每隔1~2秒，随机1~3个字同时向中心发射
+    let _autoLightningTimer = null;
+    let _clickLightningCount = 0;
+    let _explosionActive = false;
+    const EXPLODE_PHRASES = ['时间长河', '天干地支', '时空锚定'];
+    function autoLightningLoop() {
+      if (_explosionActive) {
+        _autoLightningTimer = setTimeout(autoLightningLoop, 1500);
+        return;
+      }
+      const count = 1 + Math.floor(Math.random() * 3); // 1~3道
+      for (let i = 0; i < count; i++) {
+        setTimeout(function () { fireFromRandomShichen(); }, i * 70);
+      }
+      const nextDelay = 1000 + Math.random() * 1000; // 1~2秒
+      _autoLightningTimer = setTimeout(autoLightningLoop, nextDelay);
+    }
+    autoLightningLoop();
+
+    // 点击钟表：触发一道闪电，累计12道后爆炸
+    document.querySelector('.mini-clock-wrap').addEventListener('click', function () {
+      if (_explosionActive) return;
+      if (fireFromRandomShichen()) {
+        _clickLightningCount++;
+        if (_clickLightningCount >= 12) {
+          triggerMiniExplosion();
+        }
+      }
+    });
+
+    // 中心圆点元素集合（用于爆炸动画）
+    const _centerDots = (function () {
+      const svg = document.querySelector('.mini-clock');
+      const circles = svg.querySelectorAll('circle');
+      // 取最后3个circle（中心的三个圆点）
+      const arr = [];
+      for (let i = Math.max(0, circles.length - 3); i < circles.length; i++) {
+        arr.push(circles[i]);
+      }
+      return arr;
+    })();
+
+    function triggerMiniExplosion() {
+      _explosionActive = true;
+      // 中心圆点放大3倍爆炸消失
+      _centerDots.forEach(function (c) {
+        c.classList.add('mini-center-dot-group', 'exploding');
+      });
+      // 0.4秒后显示4个汉字
+      setTimeout(function () {
+        showExplodeChars();
+      }, 400);
+    }
+
+    function showExplodeChars() {
+      const phrase = EXPLODE_PHRASES[Math.floor(Math.random() * EXPLODE_PHRASES.length)];
+      const chars = phrase.split('');
+      // 4个字排列在中心周围（上、右、下、左）
+      const positions = [[0, -32], [32, 0], [0, 32], [-32, 0]];
+      const g = document.createElementNS(SVG_NS, 'g');
+      g.setAttribute('id', 'miniExplodeChars');
+      chars.forEach(function (ch, i) {
+        const t = document.createElementNS(SVG_NS, 'text');
+        t.setAttribute('class', 'mini-explode-char');
+        t.setAttribute('x', positions[i][0]);
+        t.setAttribute('y', positions[i][1]);
+        t.textContent = ch;
+        g.appendChild(t);
+        // 逐个延迟出现
+        setTimeout(function () { t.classList.add('show'); }, i * 80);
+      });
+      miniLightningLayer.appendChild(g);
+      // 1.5秒后消失并恢复
+      setTimeout(function () {
+        hideExplodeChars(g);
+      }, 1500);
+    }
+
+    function hideExplodeChars(g) {
+      const texts = g.querySelectorAll('.mini-explode-char');
+      texts.forEach(function (t) {
+        t.classList.remove('show');
+        t.classList.add('hide');
+      });
+      setTimeout(function () {
+        g.remove();
+        // 恢复中心圆点
+        _centerDots.forEach(function (c) {
+          c.classList.remove('exploding');
+          // 强制reflow后移除class，确保动画可重播
+          void c.getBBox();
+          c.classList.remove('mini-center-dot-group');
+        });
+        _clickLightningCount = 0;
+        _explosionActive = false;
+      }, 320);
+    }
+
     let miniPrevSec = -1;
     function updateMiniClock() {
       const now = new Date();
@@ -2522,67 +3210,289 @@
     updateMiniClock();
     setInterval(updateMiniClock, 1000);
 
-    // ============ 节日锚定：中华传统节日列表 ============
-    // 农历节日数据：[月, 日, 名称, 别称]
-    const LUNAR_FESTIVALS = [
-      [1, 1, '春节', '正月初一·岁首'],
-      [1, 15, '元宵节', '正月十五·上元'],
-      [2, 2, '龙抬头', '二月初二·春龙'],
-      [3, 3, '上巳节', '三月初三·修禊'],
-      [5, 5, '端午节', '五月初五·端阳'],
-      [6, 6, '天贶节', '六月初六·回娘'],
-      [7, 7, '七夕节', '七月初七·乞巧'],
-      [7, 15, '中元节', '七月十五·盂兰'],
-      [8, 15, '中秋节', '八月十五·团圆'],
-      [9, 9, '重阳节', '九月初九·登高'],
-      [10, 1, '寒衣节', '十月初一·祭祖'],
-      [10, 15, '下元节', '十月十五·水官'],
-      [12, 8, '腊八节', '腊月初八·佛成道'],
-      [12, 23, '小年', '腊月廿三·祭灶'],
-      [12, 30, '除夕', '腊月三十·岁除']
+   // ============ 节日锚定：三大分类节庆 ============
+    // 数据格式：{type:'lunar'|'solar', m:月, d:日, name:节庆名, alias:农历/阳别称}
+    // —— 国庆（国家节庆 + 中华传统）——
+    const FEST_CN = [
+      {type:'solar', m:1,  d:1,  name:'元旦',           alias:'公历一月一日 · 新年'},
+      {type:'lunar', m:1,  d:1,  name:'春节',           alias:'正月初一 · 岁首'},
+      {type:'solar', m:2,  d:14, name:'情人节',         alias:'公历二月十四日'},
+      {type:'lunar', m:1,  d:15, name:'元宵节',         alias:'正月十五 · 上元'},
+      {type:'lunar', m:2,  d:2,  name:'龙抬头',         alias:'二月初二 · 春龙'},
+      {type:'solar', m:3,  d:8,  name:'妇女节',         alias:'公历三月八日'},
+      {type:'lunar', m:3,  d:3,  name:'上巳节',         alias:'三月初三 · 修禊'},
+      {type:'solar', m:5,  d:1,  name:'劳动节',         alias:'公历五月一日'},
+      {type:'solar', m:5,  d:4,  name:'青年节',         alias:'公历五月四日'},
+      {type:'lunar', m:5,  d:5,  name:'端午节',         alias:'五月初五 · 端阳'},
+      {type:'solar', m:6,  d:1,  name:'儿童节',         alias:'公历六月一日'},
+      {type:'lunar', m:6,  d:6,  name:'天贶节',         alias:'六月初六 · 回娘家'},
+      {type:'solar', m:7,  d:1,  name:'建党节',         alias:'公历七月一日'},
+      {type:'lunar', m:7,  d:7,  name:'七夕节',         alias:'七月初七 · 乞巧'},
+      {type:'lunar', m:7,  d:15, name:'中元节',         alias:'七月十五 · 盂兰'},
+      {type:'solar', m:8,  d:1,  name:'建军节',         alias:'公历八月一日'},
+      {type:'lunar', m:8,  d:15, name:'中秋节',         alias:'八月十五 · 团圆'},
+      {type:'solar', m:9,  d:3,  name:'抗战胜利纪念日', alias:'公历九月三日'},
+      {type:'solar', m:9,  d:10, name:'教师节',         alias:'公历九月十日'},
+      {type:'lunar', m:9,  d:9,  name:'重阳节',         alias:'九月初九 · 登高'},
+      {type:'solar', m:10, d:1,  name:'国庆节',         alias:'公历十月一日 · 华诞'},
+      {type:'solar', m:10, d:31, name:'万圣夜',         alias:'公历十月三十一日'},
+      {type:'lunar', m:10, d:1,  name:'寒衣节',         alias:'十月初一 · 祭祖'},
+      {type:'lunar', m:10, d:15, name:'下元节',         alias:'十月十五 · 水官'},
+      {type:'solar', m:12, d:24, name:'平安夜',         alias:'公历十二月二十四日'},
+      {type:'solar', m:12, d:25, name:'圣诞节',         alias:'公历十二月二十五日'},
+      {type:'lunar', m:12, d:8,  name:'腊八节',         alias:'腊月初八 · 佛成道'},
+      {type:'lunar', m:12, d:23, name:'小年',           alias:'腊月廿三 · 祭灶'},
+      {type:'lunar', m:12, d:30, name:'除夕',           alias:'腊月三十 · 岁除'}
     ];
+
+    // —— 佛教节日（佛祖、菩萨、祖师大德纪念日）——
+    const FEST_BUDDHIST = [
+      {type:'lunar', m:1,  d:1,  name:'弥勒菩萨圣诞',      alias:'正月初一 · 当来下生弥勒尊佛'},
+      {type:'lunar', m:1,  d:6,  name:'定光佛圣诞',        alias:'正月初六 · 燃灯古佛'},
+      {type:'lunar', m:1,  d:8,  name:'五殿阎罗王圣诞',    alias:'正月初八 · 阎罗天子'},
+      {type:'lunar', m:1,  d:15, name:'释迦牟尼佛涅盘(异说)', alias:'正月十五 · 涅盘异说'},
+      {type:'lunar', m:2,  d:8,  name:'释迦牟尼佛出家',    alias:'二月初八 · 逾城出家'},
+      {type:'lunar', m:2,  d:9,  name:'六祖慧能大师圣诞',  alias:'二月初九 · 禅宗六祖'},
+      {type:'lunar', m:2,  d:15, name:'释迦牟尼佛涅盘',    alias:'二月十五 · 双林入灭'},
+      {type:'lunar', m:2,  d:19, name:'观世音菩萨圣诞',    alias:'二月十九 · 观音大士'},
+      {type:'lunar', m:2,  d:21, name:'普贤菩萨圣诞',      alias:'二月廿一 · 普贤大士'},
+      {type:'lunar', m:3,  d:16, name:'准提菩萨圣诞',      alias:'三月十六 · 准提佛母'},
+      {type:'lunar', m:4,  d:4,  name:'文殊菩萨圣诞',      alias:'四月初四 · 文殊师利'},
+      {type:'lunar', m:4,  d:8,  name:'释迦牟尼佛圣诞',    alias:'四月初八 · 浴佛节·佛诞'},
+      {type:'lunar', m:4,  d:15, name:'佛吉祥日',          alias:'四月十五 · 卫塞节异说'},
+      {type:'lunar', m:4,  d:28, name:'药王菩萨圣诞',      alias:'四月廿八 · 药上菩萨'},
+      {type:'lunar', m:5,  d:3,  name:'伽蓝菩萨圣诞',      alias:'五月初三 · 伽蓝护法(关公)'},
+      {type:'lunar', m:5,  d:13, name:'伽蓝尊者圣诞',      alias:'五月十三 · 关帝圣诞'},
+      {type:'lunar', m:6,  d:3,  name:'韦驮菩萨圣诞',      alias:'六月初三 · 韦驮天护法'},
+      {type:'lunar', m:6,  d:15, name:'观世音菩萨成道',    alias:'六月十五 · 观音成道'},
+      {type:'lunar', m:6,  d:19, name:'观世音菩萨成道',    alias:'六月十九 · 观音得道'},
+      {type:'lunar', m:7,  d:13, name:'大势至菩萨圣诞',    alias:'七月十三 · 大势至大士'},
+      {type:'lunar', m:7,  d:15, name:'佛欢喜日·盂兰盆',   alias:'七月十五 · 盂兰盆会·僧自恣'},
+      {type:'lunar', m:7,  d:24, name:'龙树菩萨圣诞',      alias:'七月廿四 · 龙树菩萨'},
+      {type:'lunar', m:7,  d:30, name:'地藏菩萨圣诞',      alias:'七月三十 · 地藏大愿'},
+      {type:'lunar', m:8,  d:8,  name:'圣救度佛母圣诞',    alias:'八月初八 · 绿度母'},
+      {type:'lunar', m:8,  d:15, name:'月光菩萨圣诞',      alias:'八月十五 · 月净菩萨'},
+      {type:'lunar', m:8,  d:16, name:'金刚智三藏忌辰',    alias:'八月十六 · 开元三大士'},
+      {type:'lunar', m:8,  d:22, name:'燃灯古佛圣诞',      alias:'八月廿二 · 定光如来'},
+      {type:'lunar', m:9,  d:9,  name:'摩利支天菩萨圣诞',  alias:'九月初九 · 摩利支天'},
+      {type:'lunar', m:9,  d:19, name:'观世音菩萨出家',    alias:'九月十九 · 观音出家'},
+      {type:'lunar', m:9,  d:30, name:'药师佛圣诞',        alias:'九月三十 · 药师琉璃光如来'},
+      {type:'lunar', m:10, d:5,  name:'达摩祖师圣诞',      alias:'十月初五 · 菩提达摩·东土初祖'},
+      {type:'lunar', m:11, d:17, name:'阿弥陀佛圣诞',      alias:'十一月十七 · 无量寿佛'},
+      {type:'lunar', m:12, d:8,  name:'释迦牟尼佛成道',    alias:'腊月初八 · 佛陀成道·腊八'},
+      {type:'lunar', m:12, d:23, name:'监斋菩萨圣诞',      alias:'腊月廿三 · 监斋使者'},
+      {type:'lunar', m:12, d:29, name:'华严菩萨圣诞',      alias:'腊月廿九 · 华严大士'}
+    ];
+
+    // —— 道教节日（三清、玉皇、三元、诸真圣诞）——
+    const FEST_TAOIST = [
+      {type:'lunar', m:1,  d:1,  name:'天腊·元始天尊圣诞',        alias:'正月初一 · 天腊之辰·天宝君'},
+      {type:'lunar', m:1,  d:3,  name:'孙天医真人圣诞',          alias:'正月初三 · 药王孙思邈'},
+      {type:'lunar', m:1,  d:5,  name:'孙祖清静真人圣诞',        alias:'正月初五 · 清静散人孙不二'},
+      {type:'lunar', m:1,  d:6,  name:'清水祖师圣诞',            alias:'正月初六 · 清水真人'},
+      {type:'lunar', m:1,  d:7,  name:'三官下降·人日',           alias:'正月初七 · 三官大帝考校'},
+      {type:'lunar', m:1,  d:9,  name:'玉皇大帝圣诞',            alias:'正月初九 · 昊天金阙玉皇大天尊'},
+      {type:'lunar', m:1,  d:13, name:'关圣帝君飞升',            alias:'正月十三 · 关公飞升'},
+      {type:'lunar', m:1,  d:14, name:'三元大帝下降',            alias:'正月十四 · 三官巡天'},
+      {type:'lunar', m:1,  d:15, name:'上元天官圣诞',            alias:'正月十五 · 上元一品赐福天官'},
+      {type:'lunar', m:1,  d:15, name:'祖天师张道陵圣诞',        alias:'正月十五 · 降魔护道天尊'},
+      {type:'lunar', m:1,  d:18, name:'财神赵公明元帅圣诞',      alias:'正月十八 · 玄坛真君·武财神'},
+      {type:'lunar', m:1,  d:19, name:'长春真人丘处机圣诞',      alias:'正月十九 · 龙门派丘祖·燕九节'},
+      {type:'lunar', m:2,  d:1,  name:'地腊·刘真人圣诞',         alias:'二月初一 · 地腊之辰'},
+      {type:'lunar', m:2,  d:3,  name:'文昌帝君圣诞',            alias:'二月初三 · 梓潼帝君·文运'},
+      {type:'lunar', m:2,  d:6,  name:'东华帝君圣诞',            alias:'二月初六 · 东王公·木公'},
+      {type:'lunar', m:2,  d:15, name:'太上老君圣诞',            alias:'二月十五 · 道德天尊·道祖降诞'},
+      {type:'lunar', m:3,  d:3,  name:'真武大帝圣诞',            alias:'三月初三 · 玄天上帝·报恩节'},
+      {type:'lunar', m:3,  d:15, name:'财神赵公明元帅圣诞(二)',  alias:'三月十五 · 玄坛真君·武财神(异说)'},
+      {type:'lunar', m:3,  d:18, name:'后土皇地祇圣诞',          alias:'三月十八 · 地母娘娘·承天效法'},
+      {type:'lunar', m:3,  d:19, name:'太阳星君圣诞',            alias:'三月十九 · 日宫炎光太阳帝君'},
+      {type:'lunar', m:3,  d:20, name:'子孙娘娘圣诞',            alias:'三月二十 · 注生娘娘'},
+      {type:'lunar', m:3,  d:23, name:'妈祖天上圣母圣诞',        alias:'三月廿三 · 天妃·天后圣母'},
+      {type:'lunar', m:4,  d:1,  name:'北斗星君下降',            alias:'四月初一 · 北斗九皇'},
+      {type:'lunar', m:4,  d:8,  name:'葛孝先仙翁圣诞',          alias:'四月初八 · 太极仙翁葛玄'},
+      {type:'lunar', m:4,  d:14, name:'吕祖纯阳祖师圣诞',        alias:'四月十四 · 吕洞宾·孚佑帝君'},
+      {type:'lunar', m:4,  d:15, name:'钟离权祖师圣诞',         alias:'四月十五 · 正阳真人钟离权'},
+      {type:'lunar', m:4,  d:18, name:'紫微大帝圣诞',            alias:'四月十八 · 中天紫微北极大帝'},
+      {type:'lunar', m:4,  d:25, name:'南极长生大帝圣诞',       alias:'四月廿五 · 南极长生大帝·寿星'},
+      {type:'lunar', m:4,  d:28, name:'神农先帝圣诞',            alias:'四月廿八 · 五谷先帝·药王'},
+      {type:'lunar', m:5,  d:1,  name:'南极星君下降',            alias:'五月初一 · 南极注生'},
+      {type:'lunar', m:5,  d:5,  name:'地腊·端午·五福大帝圣诞', alias:'五月初五 · 地腊·五灵五老天君'},
+      {type:'lunar', m:5,  d:13, name:'关圣帝君圣诞',            alias:'五月十三 · 协天大帝·武圣·伽蓝'},
+      {type:'lunar', m:5,  d:18, name:'张天师圣诞(二)',         alias:'五月十八 · 张道陵天师(异说)'},
+      {type:'lunar', m:6,  d:6,  name:'天贶节·杨四将军圣诞',    alias:'六月初六 · 天贶·晒经·杨泗'},
+      {type:'lunar', m:6,  d:11, name:'井泉龙王圣诞',            alias:'六月十一 · 井泉龙王之神'},
+      {type:'lunar', m:6,  d:15, name:'王灵官元帅圣诞',         alias:'六月十五 · 先天首将王天君'},
+      {type:'lunar', m:6,  d:19, name:'慈航真人观世音成道',     alias:'六月十九 · 慈航道人·观音'},
+      {type:'lunar', m:6,  d:23, name:'火神·火德星君圣诞',      alias:'六月廿三 · 火德真君'},
+      {type:'lunar', m:6,  d:24, name:'关圣帝君圣诞(二)',       alias:'六月廿四 · 关公·武财神(异说)'},
+      {type:'lunar', m:6,  d:24, name:'雷祖大帝圣诞',            alias:'六月廿四 · 九天应元雷声普化天尊'},
+      {type:'lunar', m:7,  d:7,  name:'道德腊·七夕·魁星圣诞',   alias:'七月初七 · 道德腊·魁星·乞巧'},
+      {type:'lunar', m:7,  d:12, name:'骊山老母圣诞',            alias:'七月十二 · 骊山姥·无极老母'},
+      {type:'lunar', m:7,  d:15, name:'中元地官圣诞',            alias:'七月十五 · 中元二品赦罪地官·鬼节'},
+      {type:'lunar', m:7,  d:18, name:'王母娘娘圣诞',            alias:'七月十八 · 瑶池金母·西王母'},
+      {type:'lunar', m:8,  d:1,  name:'许逊真君飞升',            alias:'八月初一 · 许旌阳·净明派·拔宅飞升'},
+      {type:'lunar', m:8,  d:3,  name:'北斗星君圣诞',            alias:'八月初三 · 北斗九皇真君'},
+      {type:'lunar', m:8,  d:5,  name:'雷声大帝济师',            alias:'八月初五 · 雷声普化天尊(异说)'},
+      {type:'lunar', m:8,  d:15, name:'太阴星君圣诞',            alias:'八月十五 · 月宫黄华素曜元精圣后'},
+      {type:'lunar', m:8,  d:15, name:'曹国舅祖师圣诞',         alias:'八月十五 · 曹景休·八仙之一'},
+      {type:'lunar', m:9,  d:1,  name:'南斗星君下降',            alias:'九月初一 · 南斗六司延寿星君'},
+      {type:'lunar', m:9,  d:9,  name:'五腊·重阳·九皇会',       alias:'九月初九 · 斗姆圣诞·九皇大帝·登高'},
+      {type:'lunar', m:9,  d:9,  name:'孟婆尊神圣诞',            alias:'九月初九 · 孟婆·幽冥奈何之神'},
+      {type:'lunar', m:9,  d:17, name:'金龙四大王圣诞',         alias:'九月十七 · 河神·金龙大王'},
+      {type:'lunar', m:9,  d:23, name:'萨翁真君圣诞',           alias:'九月廿三 · 萨守坚真人'},
+      {type:'lunar', m:9,  d:28, name:'五显灵官大帝圣诞',       alias:'九月廿八 · 华光大帝·三眼灵官'},
+      {type:'lunar', m:10, d:1,  name:'民岁腊·寒衣节',          alias:'十月初一 · 民岁腊之辰·祭祖·寒衣'},
+      {type:'lunar', m:10, d:3,  name:'三茅真君圣诞',           alias:'十月初三 · 茅盈·茅固·茅衷'},
+      {type:'lunar', m:10, d:15, name:'下元水官圣诞',            alias:'十月十五 · 下元三品解厄水官'},
+      {type:'lunar', m:10, d:15, name:'下元水官圣诞(二)',       alias:'十月十五 · 水官洞阴大帝'},
+      {type:'lunar', m:11, d:6,  name:'西岳大帝圣诞',            alias:'十一月初六 · 西岳金天顺圣帝'},
+      {type:'lunar', m:11, d:9,  name:'湘子韩真人圣诞',         alias:'十一月初九 · 韩湘子·八仙之一'},
+      {type:'lunar', m:11, d:11, name:'太乙救苦天尊圣诞',       alias:'十一月十一 · 青玄九阳上帝'},
+      {type:'lunar', m:11, d:15, name:'正一静应张君圣诞',       alias:'十一月十五 · 张衡天师·嗣师'},
+      {type:'lunar', m:11, d:23, name:'张鲁系师真人圣诞',       alias:'十一月廿三 · 张鲁·系师'},
+      {type:'lunar', m:12, d:8,  name:'王侯腊·腊八',            alias:'腊月初八 · 王侯腊之辰·佛成道'},
+      {type:'lunar', m:12, d:16, name:'南岳大帝圣诞',            alias:'腊月十六 · 南岳司天昭圣帝'},
+      {type:'lunar', m:12, d:20, name:'鲁班先师圣诞',            alias:'腊月二十 · 巧圣先师公输子'},
+      {type:'lunar', m:12, d:21, name:'天猷上帝圣诞',            alias:'腊月廿一 · 天猷翊圣真君'},
+      {type:'lunar', m:12, d:23, name:'小年·祭灶',              alias:'腊月廿三 · 东厨司命灶君上天'},
+      {type:'lunar', m:12, d:25, name:'玄天上帝下降',            alias:'腊月廿五 · 玉帝巡天·接玉皇'},
+      {type:'lunar', m:12, d:29, name:'北斗下降·清净真人飞升',  alias:'腊月廿九 · 北斗星君下降'},
+      {type:'lunar', m:12, d:30, name:'除夕·迎神',              alias:'腊月三十 · 岁除·天地水三官交会'}
+    ];
+
+    // 当前分类 cn / buddhist / taoist
+    let festivalCat = 'cn';
+    function getFestDataByCat() {
+      switch (festivalCat) {
+        case 'buddhist': return FEST_BUDDHIST;
+        case 'taoist':   return FEST_TAOIST;
+        default:         return FEST_CN;
+      }
+    }
+    // 分类切换：顶栏三个按钮
+    document.querySelectorAll('.fc-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        SoundFX.festival();
+        festivalCat = btn.dataset.cat || 'cn';
+        document.querySelectorAll('.fc-btn').forEach(b => b.classList.toggle('is-active', b === btn));
+        buildFestivalList(festivalYear);
+      });
+    });
+
+    // 允许外部强制覆盖"今天"（调试用：window.mockFestivalToday = '2026-02-17'）
+    let __mockFestivalToday = null;
+    function __getEffectiveToday() {
+      if (__mockFestivalToday) {
+        const d = new Date(__mockFestivalToday);
+        if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+      }
+      const n = new Date();
+      return new Date(n.getFullYear(), n.getMonth(), n.getDate(), 0, 0, 0);
+    }
+
+    // 判断某阳历日期是否落在"今天往前推 2 天 ~ 今天"区间（即含今天共 3 天）
+    // 命中条件：D ∈ [今天 - 2, 今天]，也就是 节前 3 天 ~ 当天
+    function isFestivalNear(solarDate) {
+      if (!solarDate) return false;
+      const today0 = __getEffectiveToday();
+      const fest0 = new Date(solarDate.getFullYear(), solarDate.getMonth(), solarDate.getDate(), 0, 0, 0);
+      const diffDays = Math.round((fest0.getTime() - today0.getTime()) / (24 * 60 * 60 * 1000));
+      // diffDays = 0 → 当天；= -1 → 昨天（已经过了，不亮）；= 1 → 明天（亮）；= 2 → 后天（亮）
+      // 要求 提前 3 天到当天（今天、明天、后天、再后天？严格按"前三天+当天共4天窗口"是 diffDays ∈ {-2,-1,0,1,2,3?}…）
+      // 用户表述：节前3天开始亮，当天仍亮，当天过后第2天（即次日）恢复原状
+      // → 若 节日在 N 号：亮的范围是 N-3、N-2、N-1、N 共 4 天（严格从 节前第3天早上 到 节日当天结束）
+      //   也就是今天 T：fest ∈ [T, T+3] 时 亮（从"今天"往后 3 天都算"临近/节日当天"）
+      //   若 T 已经是 节日次日 N+1：diffDays = -1 → 不亮 → 符合"过了第二天不发光"
+      return (diffDays >= 0 && diffDays <= 3);
+    }
 
     function buildFestivalList(targetYear) {
       const list = document.getElementById('festivalList');
       const now = new Date();
       const currentYear = now.getFullYear();
       const baseYear = targetYear || currentYear;
-      const yGz = getYearGanZhi(baseYear);
-
-      // 更新年份显示
       document.getElementById('fyYear').textContent = baseYear + '年';
-
-      // 干支月日用该年正月初一近似（简单展示用）
-      const mGz = getMonthGanZhi(new Date(baseYear, 1, 1));
-      const dGz = getDayGanZhi(new Date(baseYear, 1, 1));
-
+      const data = getFestDataByCat();
       list.innerHTML = '';
-      LUNAR_FESTIVALS.forEach(([m, d, name, alias]) => {
-        // 农历大写
-        const monthName = LUNAR_MONTH_PREFIX[m - 1];
-        const dayName = dayToChinese(d);
-        const lunarCn = yearToChinese(baseYear) + '年' + monthName + '月' + dayName + '日';
+
+      data.forEach(fest => {
+        const type = fest.type, m = fest.m, d = fest.d, name = fest.name, alias = fest.alias;
+        let solarDate;
+        let lunarMonth, lunarDay;
+        let lunarYearForStr = baseYear;
+
+        if (type === 'lunar') {
+          lunarMonth = m;
+          // 该农历月没有三十日时（如部分年份腊月只有廿九），落到当月最后一日，避免除夕等节日错日
+          lunarDay = Math.min(d, monthDays(baseYear, m));
+          solarDate = lunarToSolar(baseYear, m, lunarDay, 12);
+        } else {
+          solarDate = new Date(baseYear, m - 1, d, 12, 0, 0);
+          const lunar = solarToLunar(solarDate);
+          lunarMonth = lunar.month;
+          lunarDay = lunar.day;
+          lunarYearForStr = lunar.year;
+        }
+        if (!solarDate) return;
+
+        const itemYGz = getYearGanZhi(solarDate.getFullYear());
+        const itemMGz = getMonthGanZhi(solarDate);
+        const itemDGz = getDayGanZhi(solarDate);
+
+        const monthName = LUNAR_MONTH_PREFIX[lunarMonth - 1];
+        const dayName = dayToChinese(lunarDay);
+        const lunarCn = yearToChinese(lunarYearForStr) + '年' + monthName + '月' + dayName + '日';
 
         const item = document.createElement('div');
         item.className = 'festival-item';
+        if (isFestivalNear(solarDate)) item.classList.add('is-upcoming');
+        // 存一下阳历日期，供定时刷新状态使用
+        try { item.dataset.festDate = solarDate.getFullYear() + '-' + String(solarDate.getMonth()+1).padStart(2,'0') + '-' + String(solarDate.getDate()).padStart(2,'0'); } catch(e){}
         item.innerHTML =
-          `<div class="fi-row1">` +
-            `<span class="fi-name">${name}</span>` +
-            `<span class="fi-lunar-date">${alias}</span>` +
-          `</div>` +
-          `<div class="fi-row2">` +
-            `<div class="fi-cell">` +
-              `<span class="fi-cell-label">干支纪年</span>` +
-              `<span class="fi-cell-value">${yGz}年 · ${mGz}月 · ${dGz}日</span>` +
-            `</div>` +
-            `<div class="fi-cell">` +
-              `<span class="fi-cell-label">农历大写</span>` +
-              `<span class="fi-cell-value">${lunarCn}</span>` +
-            `</div>` +
-          `</div>`;
+          '<div class="fi-row1">' +
+            '<span class="fi-name">' + name + '</span>' +
+            '<span class="fi-lunar-date">' + alias + '</span>' +
+          '</div>' +
+          '<div class="fi-row2">' +
+            '<div class="fi-cell">' +
+              '<span class="fi-cell-label">干支纪年</span>' +
+              '<span class="fi-cell-value">' + itemYGz + '年 · ' + itemMGz + '月 · ' + itemDGz + '日</span>' +
+            '</div>' +
+            '<div class="fi-cell">' +
+              '<span class="fi-cell-label">农历大写</span>' +
+              '<span class="fi-cell-value">' + lunarCn + '</span>' +
+            '</div>' +
+          '</div>';
         list.appendChild(item);
       });
+
+      if (!list.children.length) {
+        list.innerHTML = '<div style="padding:40px 12px;text-align:center;color:rgba(255,233,168,0.6);font-family:STKaiti,KaiTi,serif;letter-spacing:0.2em;">此年份暂无对应节日数据。</div>';
+      }
     }
+
+    // 刷新当前已渲染卡片的"临近/不临近"状态（日期跨天时自动变），不需要重建列表
+    function refreshFestivalNearState() {
+      const list = document.getElementById('festivalList');
+      if (!list) return;
+      list.querySelectorAll('.festival-item').forEach(it => {
+        const ds = it.dataset.festDate;
+        if (!ds) return;
+        const d = new Date(ds + 'T12:00:00');
+        if (isNaN(d.getTime())) return;
+        it.classList.toggle('is-upcoming', isFestivalNear(d));
+      });
+    }
+    // 每 2 分钟检查一次（翻日时最长滞后 ~2 分钟），足够避免页面打开一整天一直不刷新状态
+    try { setInterval(refreshFestivalNearState, 2 * 60 * 1000); } catch(e){}
+
+    // 调试钩子：
+    //   window.setMockFestivalToday('2026-02-17') 强制"今天"为春节当天，检查卡片是否发光
+    //   window.setMockFestivalToday('') 恢复真实今天
+    window.setMockFestivalToday = function (isoDate) {
+      __mockFestivalToday = isoDate ? (new Date(isoDate).toISOString().slice(0,10)) : null;
+      buildFestivalList(festivalYear);
+    };
 
     // ============ 年份切换：±50年限制 ============
     let festivalYear = new Date().getFullYear();
@@ -2603,9 +3513,11 @@
 
     document.getElementById('fyPrev').addEventListener('click', () => {
       if (festivalYear <= FESTIVAL_MIN_YEAR) {
+        SoundFX.error();
         showFestivalToast('时间到此为止，无需过多赘述。\n若想查询，请在50年内进行查询即可。');
         return;
       }
+      SoundFX.year();
       festivalYear--;
       buildFestivalList(festivalYear);
       updateYearBtns();
@@ -2613,9 +3525,11 @@
 
     document.getElementById('fyNext').addEventListener('click', () => {
       if (festivalYear >= FESTIVAL_MAX_YEAR) {
+        SoundFX.error();
         showFestivalToast('时间到此为止，无需过多赘述。\n若想查询，请在50年内进行查询即可。');
         return;
       }
+      SoundFX.year();
       festivalYear++;
       buildFestivalList(festivalYear);
       updateYearBtns();
@@ -2624,11 +3538,114 @@
     buildFestivalList(festivalYear);
     updateYearBtns();
 
+    // ============ 钟表左右两侧：当日节日（竖排呼吸灯） ============
+    function collectTodaysFestivals(nowDate) {
+      const d = nowDate ? new Date(nowDate) : new Date();
+      // 阳历月日
+      const sm = d.getMonth() + 1;
+      const sd = d.getDate();
+      // 农历月日
+      let lunar = null;
+      try { lunar = solarToLunar(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12)); } catch (e) {}
+      const lm = lunar ? lunar.month : null;
+      const ld = lunar ? lunar.day : null;
+      function matchOne(fest) {
+        if (fest.type === 'lunar') return (fest.m === lm && fest.d === ld);
+        return (fest.m === sm && fest.d === sd);
+      }
+      const cnMatches = FEST_CN.filter(matchOne).map(f => ({ ...f, src: 'cn', catName: '中华节日' }));
+      const budMatches = FEST_BUDDHIST.filter(matchOne).map(f => ({ ...f, src: 'buddhist', catName: '佛教节日' }));
+      const taoMatches = FEST_TAOIST.filter(matchOne).map(f => ({ ...f, src: 'taoist', catName: '道教节日' }));
+      return { cn: cnMatches, bud: budMatches, tao: taoMatches };
+    }
+
+    function renderSideFestivals(nowDate) {
+      const leftBox = document.getElementById('sideFestLeft');
+      const rightBox = document.getElementById('sideFestRight');
+      if (!leftBox || !rightBox) return;
+      const groups = collectTodaysFestivals(nowDate);
+      // 每个栏只展示最多 2 条（避免字过长撑破版面），展示顺序按原数据顺序即可
+      const leftItems = [];
+      const rightItems = [];
+      // 重日规则：
+      //  - 中华节日 → 左边
+      //  - 佛教节日 → 右边
+      //  - 三个重日：左=中华，右=[佛教, 道教]（佛教先、道教紧挨其旁）
+      //  - 只有佛教 或 佛教+道教但没中华：把佛教提到左侧（道教继续右侧）
+      //  - 只有道教 或 中华+道教 无佛教：道教放右侧
+      //  - 其他极端情况（仅道教等）：左右做兜底分配
+      function pickTop(arr, n) { return arr.slice(0, n); }
+      const hasCN  = groups.cn.length > 0;
+      const hasBud = groups.bud.length > 0;
+      const hasTao = groups.tao.length > 0;
+      let useLeftForBuddhistOnly = !hasCN && hasBud;   // 无中华时让佛教占左侧
+      // 左侧
+      if (hasCN) {
+        leftItems.push(...pickTop(groups.cn, 2));
+      } else if (useLeftForBuddhistOnly) {
+        leftItems.push(...pickTop(groups.bud, 2));
+      } else if (hasTao && !hasBud) {
+        leftItems.push(...pickTop(groups.tao, 2));
+      }
+      // 右侧
+      // 如果左侧已经放了佛教（useLeftForBuddhistOnly），右侧就不放佛教了
+      if (hasBud && !useLeftForBuddhistOnly) {
+        rightItems.push(...pickTop(groups.bud, 2));
+      }
+      if (hasTao) {
+        // 若左侧放的是道教（无中华无佛教），跳过道教再塞入右侧；否则始终把道教放右侧佛教之后
+        if (!(hasTao && !hasCN && !hasBud)) {
+          rightItems.push(...pickTop(groups.tao, 2));
+        }
+      }
+
+      function renderBox(box, items) {
+        box.innerHTML = '';
+        items.forEach(it => {
+          const el = document.createElement('div');
+          el.className = 'sf-item';
+          el.dataset.src = it.src;
+          const title = it.name;
+          const alias = it.alias || '';
+          el.innerHTML =
+            '<span class="sf-cat">' + it.catName + '</span>' +
+            '<span>' + title + '</span>' +
+            (alias ? '<span style="font-size:9.5px;opacity:.72;letter-spacing:.16em;margin-top:.4em;display:block;">' + alias + '</span>' : '');
+          el.title = (alias ? (alias + ' · ') : '') + title;
+          box.appendChild(el);
+        });
+      }
+      renderBox(leftBox, leftItems);
+      renderBox(rightBox, rightItems);
+    }
+    // 初始化 + 每秒刷新一次（翻日就自动更新）
+    try { renderSideFestivals(new Date()); } catch (e) {}
+    setInterval(() => { try { renderSideFestivals(new Date()); } catch (e) {} }, 60 * 1000);
+    // 暴露以便调试：window.mockSideFestivalsDate('2026-02-17') 可模拟特定日期
+    window.mockSideFestivalsDate = function (isoDateStr) {
+      const d = isoDateStr ? new Date(new Date(isoDateStr).toISOString().slice(0, 10) + 'T12:00:00') : new Date();
+      try { renderSideFestivals(d); } catch (e) { console.error(e); }
+    };
+
     // ============ 弹窗通用：打开/关闭 ============
     function openModal(id) {
+      SoundFX.modalOpen();
       document.getElementById(id).hidden = false;
+      // 打开查询弹窗时，强制切换到阳历Tab，避免显示残留
+      if (id === 'modalQuery') {
+        // 切换到阳历（同时设置hidden和display双保险）
+        const solar = document.getElementById('formSolar');
+        const lunar = document.getElementById('formLunar');
+        document.querySelectorAll('.qf-tab').forEach(t => t.classList.toggle('is-active', t.dataset.mode === 'solar'));
+        solar.style.display = '';
+        solar.hidden = false;
+        lunar.style.display = 'none';
+        lunar.hidden = true;
+        queryMode = 'solar';
+      }
     }
     function closeModal(id) {
+      SoundFX.modalClose();
       document.getElementById(id).hidden = true;
     }
     document.querySelectorAll('[data-close]').forEach(btn => {
@@ -2640,8 +3657,9 @@
     });
 
     // ============ 查 / 秘 按钮 ============
-    document.getElementById('btnQuery').addEventListener('click', () => openModal('modalQuery'));
+    document.getElementById('btnQuery').addEventListener('click', () => { SoundFX.click(); openModal('modalQuery'); });
     document.getElementById('btnSecret').addEventListener('click', () => {
+      SoundFX.click();
       resetSecret();
       openModal('modalSecret');
     });
@@ -2670,25 +3688,48 @@
 
     // ============ 查询：阳历 / 公历 切换 ============
     let queryMode = 'solar';
-    let lunarInputType = 'cn';
 
     function switchQueryMode(mode) {
       queryMode = mode;
       document.querySelectorAll('.qf-tab').forEach(t => t.classList.toggle('is-active', t.dataset.mode === mode));
-      document.getElementById('formSolar').hidden = (mode !== 'solar');
-      document.getElementById('formLunar').hidden = (mode !== 'lunar');
+      const solar = document.getElementById('formSolar');
+      const lunar = document.getElementById('formLunar');
+      if (mode === 'solar') {
+        solar.style.display = '';
+        lunar.style.display = 'none';
+        solar.hidden = false;
+        lunar.hidden = true;
+      } else {
+        solar.style.display = 'none';
+        lunar.style.display = '';
+        solar.hidden = true;
+        lunar.hidden = false;
+      }
     }
     document.querySelectorAll('.qf-tab').forEach(tab => {
-      tab.addEventListener('click', () => switchQueryMode(tab.dataset.mode));
+      tab.addEventListener('click', () => { SoundFX.tab(); switchQueryMode(tab.dataset.mode); });
     });
 
-    // 公历子Tab：大写汉字 / 八字
-    document.querySelectorAll('.lunar-use-row .qst-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        lunarInputType = btn.dataset.lunarType;
-        document.querySelectorAll('.lunar-use-row .qst-btn').forEach(b => b.classList.toggle('is-active', b === btn));
-      });
-    });
+    // 填充结果到指定后缀（S = solar, L = lunar）
+    function setResult(date, suffix) {
+      const suf = suffix; // 'S' or 'L'
+      const yGz = getYearGanZhi(date.getFullYear());
+      const mGz = getMonthGanZhi(date);
+      const dGz = getDayGanZhi(date);
+      const hGz = getHourGanZhiByDate(date);
+      document.getElementById('qrBazi' + suf).textContent = `${yGz}年 ${mGz}月 ${dGz}日 ${hGz}时`;
+
+      const lunar = solarToLunar(date);
+      const leapPrefix = lunar.isLeap ? '闰' : '';
+      document.getElementById('qrLunar' + suf).textContent =
+        yearToChinese(lunar.year) + '年' + leapPrefix + LUNAR_MONTH_PREFIX[lunar.month - 1] + '月' + dayToChinese(lunar.day) + '日';
+
+      const pad = n => String(n).padStart(2, '0');
+      document.getElementById('qrSolar' + suf).textContent =
+        `${date.getFullYear()}年${pad(date.getMonth()+1)}月${pad(date.getDate())}日 ${pad(date.getHours())}时`;
+
+      document.getElementById('queryResult' + (suf === 'S' ? 'Solar' : 'Lunar')).hidden = false;
+    }
 
     // ============ 拨动选择器 ============
     // 数据源
@@ -2738,6 +3779,7 @@
       roller.appendChild(dnBtn);
 
       const change = (delta) => {
+        SoundFX.roller();
         const s = rollerStates[id];
         if (s.type && ROLLER_DATA[s.type]) {
           const arr = ROLLER_DATA[s.type];
@@ -2775,8 +3817,14 @@
     function lunarToSolar(year, month, day, hour) {
       if (!lunarInfo[year - 1900]) return null;
       let days = 0;
+      // 先累加 1900 到 year-1 所有整年的天数
+      for (let y = 1900; y < year; y++) {
+        days += lunarYearDays(y);
+      }
+      // 再累加 year 年 1 月 到 month-1 月的天数
       const leapM = leapMonth(year);
-      for (let i = 1; i < month; i++) days += monthDays(year, i);
+      for (let i2 = 1; i2 < month; i2++) days += monthDays(year, i2);
+      // 若闰月出现在目标月之前，还要加上闰月天数
       if (leapM > 0 && leapM < month) days += leapDays(year);
       days += day - 1;
       const result = new Date(1900, 0, 31);
@@ -2785,77 +3833,60 @@
       return result;
     }
 
-    // 八字 → 阳历（按年柱反推年，日柱遍历找日期）
+    // 八字 → 阳历（按年柱反推年，日柱遍历全年找日期）
     function baziToSolar(yearGz, dayGz, hour) {
       let year = 1984;
       while (getYearGanZhi(year) !== yearGz && year < 2100) year++;
       if (year >= 2100) return null;
       if (!dayGz) return new Date(year, 5, 15, hour);
-      for (let mo = 0; mo < 12; mo++) {
-        for (let d = 1; d <= 28; d++) {
-          const dt = new Date(year, mo, d, hour);
-          if (getDayGanZhi(dt) === dayGz) return dt;
-        }
+      const start = new Date(year, 0, 1, hour);
+      for (let i = 0; i < 366; i++) {
+        const dt = new Date(start.getTime() + i * 86400000);
+        if (dt.getFullYear() !== year) break;
+        if (getDayGanZhi(dt) === dayGz) return dt;
       }
       return new Date(year, 5, 15, hour);
     }
 
-    // 显示查询结果
-    function showQueryResult(date) {
-      const yGz = getYearGanZhi(date.getFullYear());
-      const mGz = getMonthGanZhi(date);
-      const dGz = getDayGanZhi(date);
-      const hGz = getHourGanZhiByDate(date);
-      document.getElementById('qrBazi').textContent = `${yGz}年 ${mGz}月 ${dGz}日 ${hGz}时`;
-
-      const lunar = solarToLunar(date);
-      const leapPrefix = lunar.isLeap ? '闰' : '';
-      document.getElementById('qrLunar').textContent =
-        yearToChinese(lunar.year) + '年' + leapPrefix + LUNAR_MONTH_PREFIX[lunar.month - 1] + '月' + dayToChinese(lunar.day) + '日';
-
-      const pad = n => String(n).padStart(2, '0');
-      document.getElementById('qrSolar').textContent =
-        `${date.getFullYear()}年${pad(date.getMonth()+1)}月${pad(date.getDate())}日 ${pad(date.getHours())}时`;
-
-      document.getElementById('queryResult').hidden = false;
-    }
-
-    // 阳历查询
+    // 阳历查询 → 填到 S 结果区
     document.getElementById('btnDoQuery').addEventListener('click', () => {
+      SoundFX.confirm();
       const y = getRollerVal('rollSY');
       const mo = getRollerVal('rollSM');
       const d = getRollerVal('rollSD');
       const h = getRollerVal('rollSH');
       const date = new Date(y, mo - 1, d, h, 0, 0);
-      showQueryResult(date);
+      setResult(date, 'S');
     });
 
-    // 公历查询
-    document.getElementById('btnDoQueryLunar').addEventListener('click', () => {
-      let date = null;
-      if (lunarInputType === 'cn') {
-        // 大写汉字：cn-year val=0..99 → 2000+val
-        const yIdx = getRollerVal('rollLY');
-        const mIdx = getRollerVal('rollLM');
-        const dIdx = getRollerVal('rollLD');
-        const hIdx = getRollerVal('rollLH');
-        const year = 2000 + yIdx;
-        const month = mIdx + 1;
-        const day = dIdx + 1;
-        const hour = hIdx * 2; // 子时=0, 丑时=2...
-        date = lunarToSolar(year, month, day, hour);
-      } else {
-        // 八字
-        const yIdx = getRollerVal('rollBY');
-        const dIdx = getRollerVal('rollBD');
-        const hIdx = getRollerVal('rollBH');
-        const yearGz = ROLLER_DATA.bazi[yIdx].text;
-        const dayGz = ROLLER_DATA.bazi[dIdx].text;
-        const hour = hIdx * 2;
-        date = baziToSolar(yearGz, dayGz, hour);
-      }
+    // 公历：大写汉字 查询 → 填到 L 结果区
+    document.getElementById('btnDoQueryCn').addEventListener('click', () => {
+      SoundFX.confirm();
+      const yIdx = getRollerVal('rollLY');
+      const mIdx = getRollerVal('rollLM');
+      const dIdx = getRollerVal('rollLD');
+      const hIdx = getRollerVal('rollLH');
+      const year = 2000 + yIdx;
+      const month = mIdx + 1;
+      const day = dIdx + 1;
+      const hour = hIdx * 2;
+      const date = lunarToSolar(year, month, day, hour);
       if (!date) { alert('无法解析，请调整选择'); return; }
-      showQueryResult(date);
+      setResult(date, 'L');
+    });
+
+    // 公历：生辰八字 查询 → 填到 L 结果区
+    document.getElementById('btnDoQueryBazi').addEventListener('click', () => {
+      SoundFX.confirm();
+      const yIdx = getRollerVal('rollBY');
+      const dIdx = getRollerVal('rollBD');
+      const hIdx = getRollerVal('rollBH');
+      const yearGz = ROLLER_DATA.bazi[yIdx].text;
+      const dayGz = ROLLER_DATA.bazi[dIdx].text;
+      const hour = hIdx * 2;
+      const date = baziToSolar(yearGz, dayGz, hour);
+      if (!date) { alert('无法解析，请调整选择'); return; }
+      setResult(date, 'L');
     });
 
     // ============ 九宫格密码 ============
@@ -2908,6 +3939,7 @@
     }
 
     function onSecretClick(cell, ch) {
+      SoundFX.secret();
       // 允许重复点击同一格（支持 酉酉酉 序列）
       secretInput.push(ch);
       cell.classList.add('selected');
@@ -2916,6 +3948,7 @@
       const idx = secretInput.length - 1;
       if (secretInput[idx] !== SECRET_CODE[idx]) {
         // 错误
+        SoundFX.error();
         cell.classList.add('error');
         showSecretError();
         setTimeout(() => {
@@ -2926,6 +3959,7 @@
 
       if (secretInput.length === SECRET_CODE.length) {
         // 密码正确
+        SoundFX.unlock();
         setTimeout(() => {
           closeModal('modalSecret');
           buildFamilyList();
