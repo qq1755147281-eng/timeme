@@ -278,6 +278,7 @@
   .sf-item[data-src="buddhist"] { color: #ffd9b8; text-shadow: 0 0 8px rgba(255, 175, 110, 0.55); }
   .sf-item[data-src="taoist"]   { color: #c8e8ff; text-shadow: 0 0 8px rgba(135, 185, 255, 0.55); }
   .sf-item[data-src="week"]    { color: #ffe9a8; text-shadow: 0 0 8px rgba(255, 215, 130, 0.5); }
+  .sf-item[data-src="birthday"]{ color: #ffc6d9; text-shadow: 0 0 10px rgba(255, 182, 213, 0.65); }   /* 至亲当日生辰：暖粉金，区别于节日 */
   @keyframes sfBreath {
     0%   { opacity: 0.72; box-shadow: 0 0 4px rgba(255, 215, 130, 0.18); }
     40%  { opacity: 1;    box-shadow: 0 0 14px rgba(255, 215, 130, 0.62), 0 0 24px rgba(255, 195, 80, 0.32); }
@@ -1677,23 +1678,27 @@
   /* 目标块：阿拉伯 + 干支 两行 */
   .cd-tgt { font-size:12px; color:rgba(255,233,168,0.7); letter-spacing:0.08em; line-height:1.8; }
   .cd-tgt.gz { color:#ffd966; text-shadow:0 0 8px rgba(255,215,130,0.5); }
-  /* 大号倒计时方框：天/时/分/秒（一行） */
+  /* 大号倒计时方框：天/时/分/秒（一行）——锁定高度，避免每秒数字变化导致方框上下跳动 */
   .cd-big-box {
     box-sizing:border-box;
-    display:flex; justify-content:center; align-items:baseline; gap:10px;
+    display:flex; justify-content:center; align-items:center; gap:10px;   /* baseline→center：避免字形基线漂移 */
     flex-wrap:nowrap; width:100%;
     margin:12px 0; padding:14px 22px;
     border:1px solid rgba(255,215,130,0.4); border-radius:8px;
     background:rgba(255,215,130,0.06);
     box-shadow:0 0 18px rgba(255,215,130,0.25), inset 0 0 12px rgba(255,215,130,0.1);
   }
-  .cd-big-cell { display:flex; align-items:baseline; gap:2px; white-space:nowrap; }
+  .cd-big-cell {
+    display:flex; align-items:center; gap:4px; white-space:nowrap;
+    height: clamp(34px, 5.6vw, 46px);   /* 固定 cell 高度，锁死不随字形变化 */
+  }
   .cd-big {
     font-family:"STKaiti","KaiTi","楷体",serif; font-weight:700;
     font-size: clamp(30px, 5.4vw, 42px);
     color:#ffe9a8; font-variant-numeric:tabular-nums;
+    font-feature-settings:"tnum" 1;     /* 强制等宽数字，宽度稳定 */
     text-shadow:0 0 14px rgba(255,215,130,0.9), 0 0 28px rgba(255,195,80,0.5);
-    line-height:1;
+    line-height:1; display:inline-block;
   }
   .cd-big-u { font-size: clamp(12px, 1.8vw, 16px); color:rgba(255,233,168,0.85); }
   /* 方框外：年月日时分秒（大写汉字，一行） */
@@ -1702,6 +1707,7 @@
     color:#ffe9a8; letter-spacing:0.08em;
     margin-top:10px; white-space:nowrap; overflow-x:hidden;
     text-shadow:0 0 8px rgba(255,215,130,0.55);
+    line-height:1.6;   /* 固定行高，防止阿拉伯小字内容变化导致高度跳动 */
   }
   /* 倒计时状态卡：运行中（黄）/ 已结束（绿） */
   .cd-done {
@@ -2559,7 +2565,10 @@
   /* ============ 家人生日页面 ============ */
   .family-card {
     width: 90vw;
+    max-height: 90vh;
     min-height: 90vh;
+    display: flex;
+    flex-direction: column;
   }
 
   .family-list {
@@ -2567,8 +2576,9 @@
     flex-direction: column;
     gap: 12px;
     margin-top: 8px;
-    max-height: 75vh;
-    overflow-y: auto;
+    flex: 1;
+    min-height: 0;            /* 关键：允许 flex 子项收缩，配合 overflow 持续滚动 */
+    overflow-y: auto;          /* 持续下拉，所有卡片均可滚到 */
     padding: 4px 4px 20px;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 215, 130, 0.4) transparent;
@@ -2580,13 +2590,15 @@
   }
 
   .family-item {
-    padding: 14px 18px;
+    padding: 14px 18px;                 /* 左 padding 32→18：整体内容向左靠，避免溢出 */
     background: rgba(40, 28, 70, 0.4);
     border: 1px solid rgba(255, 215, 130, 0.25);
     border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: auto 1fr;   /* 左列：圆球，右列：名+状态；阳历农历跨整列 */
+    align-items: start;                 /* 圆球固定左上 */
+    row-gap: 4px;                       /* 行间距：8→4，名字与状态栏进一步贴近 */
+    column-gap: 9px;                    /* 列间距：14→9，圆球与文字收紧 */
     transition: all 0.25s;
   }
   .family-item:hover {
@@ -2596,9 +2608,8 @@
   }
 
   .fi-relation {
-    flex-shrink: 0;
-    width: 56px;
-    height: 56px;
+    width: 46px;                        /* 42→46：容纳"五姨夫"三字 */
+    height: 46px;
     border-radius: 50%;
     background: rgba(255, 215, 130, 0.15);
     border: 1px solid rgba(255, 215, 130, 0.5);
@@ -2607,24 +2618,32 @@
     justify-content: center;
     font-family: "STKaiti", "KaiTi", "楷体", serif;
     font-weight: 700;
-    font-size: 17px;
+    font-size: 13px;                    /* 14→13：三字也能单行放下 */
     color: #ffe9a8;
     text-shadow: 0 0 10px rgba(255, 215, 130, 0.7);
+    grid-column: 1;
+    grid-row: 1;                        /* 圆球固定左上方：第 1 列第 1 行 */
   }
 
   .fi-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
+    /* Grid 直接操作子节点，fi-info 已移除；保留此选择器避免其他模块冲突 */
   }
 
   .fi-name-row {
     display: flex;
     align-items: baseline;
     gap: 10px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;                 /* 原 wrap → 强制整行不折（字已缩小可容纳） */
+    grid-column: 2;
+    grid-row: 1;                        /* 名+状态：第 1 行右侧，与圆球同一行 */
+    padding-top: 2px;                   /* 与缩小的圆球视觉基线对齐 */
+    min-width: 0;
+  }
+
+  /* 阳历、农历：从卡片最左侧新起一整行（跨左右两列），正规通栏显示 */
+  .fi-solar,
+  .fi-lunar {
+    grid-column: 1 / -1;                /* 跨整行：从左 padding 到右 padding */
   }
 
   .fi-name {
@@ -2633,13 +2652,32 @@
     font-size: 17px;
     color: #fff3c4;
     text-shadow: 0 0 10px rgba(255, 215, 130, 0.6);
+    grid-column: 2;
+    grid-row: 1;                            /* 名字：与圆球同行第 1 行右侧 */
+    padding-top: 0px;                       /* 2→0，整体上移，让状态栏更近 */
+    margin-bottom: -2px;                    /* 额外负间距，进一步贴近下方状态栏 */
+    line-height: 1.25;                      /* 收紧行高，减少下方空白 */
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .fi-cd {
+    /* 默认样式（13px 等）保持在下方定义；此处仅做 Grid 定位：名字正下方（列 2 行 2） */
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    align-self: start;
+    margin-top: -5px;                       /* -2→-5px，大幅向上贴近名字 */
+    line-height: 1.2;                       /* 收紧行高 */
   }
 
   .fi-solar {
     font-family: "STKaiti", "KaiTi", "楷体", serif;
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255, 233, 168, 0.7);
     letter-spacing: 0.05em;
+    white-space: nowrap;
+    margin-top: 6px;                       /* 状态栏与阳历行保持合理间隔，避免过挤 */
   }
 
   .fi-lunar {
@@ -2649,42 +2687,131 @@
     color: #ffe9a8;
     letter-spacing: 0.08em;
     text-shadow: 0 0 8px rgba(255, 215, 130, 0.4);
+    white-space: nowrap;
   }
 
   /* 倒计时文字默认样式 */
   .fi-cd {
     font-family: "STKaiti", "KaiTi", "楷体", serif;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 13px;                    /* 原 15 → 缩小一号，保证单行可显示 */
     color: rgba(255, 233, 168, 0.75);
     letter-spacing: 0.05em;
+    white-space: nowrap;                /* 强制生日状态单行，不折行 */
   }
 
   /* 已过生日：仅倒计时文字变灰，名字保持金色 */
-  .fi-name-row.is-past .fi-cd {
+  .family-item.is-past .fi-cd {
     color: #8a8aa0;
     text-shadow: none;
   }
 
-  /* 今日生日：倒计时放大发光脉冲 */
-  .fi-name-row.is-today .fi-name,
-  .fi-name-row.is-today .fi-cd {
-    font-size: 22px;
+  /* 今日生日：倒计时放大发光脉冲（仅fi-cd缩小一号，名字保持22px） */
+  .family-item.is-today .fi-name,
+  .family-item.is-today .fi-cd {
     color: #fff3c4;
     text-shadow: 0 0 14px rgba(255, 215, 130, 0.9), 0 0 28px rgba(255, 195, 80, 0.6);
     animation: todayPulse 1.6s ease-in-out infinite;
   }
+  .family-item.is-today .fi-name { font-size: 22px; }
+  .family-item.is-today .fi-cd   { font-size: 20px; }  /* 原 22 → 缩小一号 */
   @keyframes todayPulse {
     0%, 100% { text-shadow: 0 0 14px rgba(255, 215, 130, 0.9), 0 0 28px rgba(255, 195, 80, 0.6); }
     50% { text-shadow: 0 0 20px rgba(255, 215, 130, 1), 0 0 40px rgba(255, 195, 80, 0.8); }
   }
 
-  /* 7天内生日：倒计时放大发光 */
-  .fi-name-row.is-soon .fi-name,
-  .fi-name-row.is-soon .fi-cd {
-    font-size: 20px;
+  /* 7天内生日：倒计时放大发光（仅fi-cd缩小一号，名字保持20px） */
+  .family-item.is-soon .fi-name,
+  .family-item.is-soon .fi-cd {
     color: #fff3c4;
     text-shadow: 0 0 12px rgba(255, 215, 130, 0.8), 0 0 24px rgba(255, 195, 80, 0.5);
+  }
+  .family-item.is-soon .fi-name { font-size: 20px; }
+  .family-item.is-soon .fi-cd   { font-size: 18px; }  /* 原 20 → 缩小一号 */
+
+  /* ============ 家人生日：年份切换条 ============ */
+  .family-year-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;                          /* 22→12：按钮靠近中间年份 */
+    padding: 6px 0 10px;
+    flex-shrink: 0;
+  }
+  .fm-btn {
+    padding: 8px 30px;                  /* 长方形按钮：左右加长 */
+    background: rgba(255, 215, 130, 0.12);
+    border: 1px solid rgba(255, 215, 130, 0.4);
+    border-radius: 6px;
+    color: #ffe9a8;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-shadow: 0 0 10px rgba(255, 215, 130, 0.6);
+  }
+  .fm-btn:hover {
+    background: rgba(255, 215, 130, 0.22);
+    border-color: #ffd966;
+    box-shadow: 0 0 16px rgba(255, 215, 130, 0.5);
+  }
+  .fm-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .fm-year {
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-weight: 700;
+    font-size: clamp(20px, 3vw, 28px);
+    color: #ffe9a8;
+    letter-spacing: 0.1em;
+    min-width: 130px;
+    text-align: center;
+    text-shadow: 0 0 12px rgba(255, 215, 130, 0.6);
+  }
+
+  /* 真实生辰行：默认隐藏，点击头像后显示 */
+  .fi-real {
+    grid-column: 1 / -1;
+    display: none;
+    margin-top: 4px;
+    padding: 4px 8px;                        /* 12→8：内容向左靠拢 */
+    background: rgba(255, 215, 130, 0.1);
+    border-left: 2px solid rgba(255, 215, 130, 0.7);
+    border-radius: 3px;
+    font-family: "STKaiti", "KaiTi", "楷体", serif;
+    font-size: 11px;                          /* 13→11：缩小一号，确保单行 */
+    color: #fff3c4;
+    letter-spacing: 0.04em;                   /* 0.06→0.04：收紧字距 */
+    text-shadow: 0 0 8px rgba(255, 215, 130, 0.5);
+    white-space: nowrap;
+    animation: realFadeIn 0.3s ease;
+  }
+  @keyframes realFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .family-item.show-real .fi-real { display: block; }
+
+  /* 头像可点击 */
+  .fi-relation {
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  /* 点击后头像发光脉冲 */
+  .family-item.show-real .fi-relation {
+    background: rgba(255, 215, 130, 0.32);
+    border-color: #ffd966;
+    box-shadow:
+      0 0 18px rgba(255, 215, 130, 0.9),
+      0 0 36px rgba(255, 195, 80, 0.6);
+    animation: headPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes headPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(255, 215, 130, 0.9), 0 0 36px rgba(255, 195, 80, 0.6); }
+    50%      { box-shadow: 0 0 26px rgba(255, 215, 130, 1),  0 0 52px rgba(255, 195, 80, 0.8); }
   }
 </style>
 </head>
@@ -3089,6 +3216,12 @@
       </div>
 
       <div class="modal-hint">血脉相连 · 生辰铭记</div>
+
+      <div class="family-year-bar">
+        <button class="fy-btn fm-btn" type="button" id="fmPrev">上一年</button>
+        <span class="fy-year fm-year" id="fmYear">2026年</span>
+        <button class="fy-btn fm-btn" type="button" id="fmNext">下一年</button>
+      </div>
 
       <div class="family-list" id="familyList"></div>
     </div>
@@ -4349,14 +4482,12 @@
         if (isFestivalNear(solarDate)) item.classList.add('is-upcoming');
         // 存一下阳历日期，供定时刷新状态使用
         try { item.dataset.festDate = solarDate.getFullYear() + '-' + String(solarDate.getMonth()+1).padStart(2,'0') + '-' + String(solarDate.getDate()).padStart(2,'0'); } catch(e){}
-        const descBelow = !!fest.descBelow;
-        const descCls = 'fi-alias-desc' + (fest.descSmall ? ' fi-alias-desc--sm' : '') + (descBelow ? ' fi-alias-desc--below' : '');
+        const descCls = 'fi-alias-desc' + (fest.descSmall ? ' fi-alias-desc--sm' : '');
         item.innerHTML =
           '<div class="fi-row1">' +
             '<span class="fi-name">' + name + '</span>' +
-            (aliasDesc && !descBelow ? '<span class="' + descCls + '">' + aliasDesc + '</span>' : '') +
           '</div>' +
-          (aliasDesc && descBelow ? '<div class="' + descCls + '">' + aliasDesc + '</div>' : '') +
+          (aliasDesc ? '<div class="' + descCls + ' fi-alias-desc--below">' + aliasDesc + '</div>' : '') +
           '<div class="fi-row2">' +
             '<div class="fi-cell">' +
               '<span class="fi-cell-label">农历大写</span>' +
@@ -4448,9 +4579,9 @@
       // 阳历月日
       const sm = d.getMonth() + 1;
       const sd = d.getDate();
-      // 农历月日
+      // 农历月日 —— 与下方"农历大写"(lunarDateCn)同源：均由 solarToLunar(now) 计算，确保节日/生日判定与页面农历显示完全一致
       let lunar = null;
-      try { lunar = solarToLunar(new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12)); } catch (e) {}
+      try { lunar = solarToLunar(d); } catch (e) {}
       const lm = lunar ? lunar.month : null;
       const ld = lunar ? lunar.day : null;
       function matchOne(fest) {
@@ -4460,7 +4591,11 @@
       const cnMatches = FEST_CN.filter(matchOne).map(f => ({ ...f, src: 'cn', catName: '中华节日' }));
       const budMatches = FEST_BUDDHIST.filter(matchOne).map(f => ({ ...f, src: 'buddhist', catName: '佛教节日' }));
       const taoMatches = FEST_TAOIST.filter(matchOne).map(f => ({ ...f, src: 'taoist', catName: '道教节日' }));
-      return { cn: cnMatches, bud: budMatches, tao: taoMatches };
+      // 至亲当日生辰：按农历月日匹配今日农历月日（生日固定以农历为准）
+      const bdayMatches = (typeof FAMILY_LUNAR_BIRTH !== 'undefined' ? FAMILY_LUNAR_BIRTH : [])
+        .filter(mem => !mem.missing && mem.lunarMonth === lm && mem.lunarDay === ld)
+        .map(mem => ({ src: 'birthday', catName: '至亲生辰', name: mem.relation + ' ' + mem.name, alias: mem.remark || '' }));
+      return { cn: cnMatches, bud: budMatches, tao: taoMatches, bday: bdayMatches };
     }
 
     function renderSideFestivals(nowDate) {
@@ -4471,37 +4606,27 @@
       // 每个栏只展示最多 2 条（避免字过长撑破版面），展示顺序按原数据顺序即可
       const leftItems = [];
       const rightItems = [];
-      // 重日规则：
-      //  - 中华节日 → 左边
-      //  - 佛教节日 → 右边
-      //  - 三个重日：左=中华，右=[佛教, 道教]（佛教先、道教紧挨其旁）
-      //  - 只有佛教 或 佛教+道教但没中华：把佛教提到左侧（道教继续右侧）
-      //  - 只有道教 或 中华+道教 无佛教：道教放右侧
-      //  - 其他极端情况（仅道教等）：左右做兜底分配
+      // 布局规则：中华→左；佛教/道教/至亲生辰→右；无中华时左侧补星期几
       function pickTop(arr, n) { return arr.slice(0, n); }
       const hasCN  = groups.cn.length > 0;
       const hasBud = groups.bud.length > 0;
       const hasTao = groups.tao.length > 0;
-      let useLeftForBuddhistOnly = !hasCN && hasBud;   // 无中华时让佛教占左侧
-      // 左侧
+      // 左侧：仅中华节日
       if (hasCN) {
         leftItems.push(...pickTop(groups.cn, 2));
-      } else if (useLeftForBuddhistOnly) {
-        leftItems.push(...pickTop(groups.bud, 2));
-      } else if (hasTao && !hasBud) {
-        leftItems.push(...pickTop(groups.tao, 2));
       }
-      // 右侧
-      // 如果左侧已经放了佛教（useLeftForBuddhistOnly），右侧就不放佛教了
-      if (hasBud && !useLeftForBuddhistOnly) {
+      // 右侧：至亲当日生辰置顶（靠钟表最显眼），其后佛教、道教
+      if (groups.bday && groups.bday.length) {
+        rightItems.push(...pickTop(groups.bday, 2));
+      }
+      if (hasBud) {
         rightItems.push(...pickTop(groups.bud, 2));
       }
       if (hasTao) {
-        // 若左侧放的是道教（无中华无佛教），跳过道教再塞入右侧；否则始终把道教放右侧佛教之后
-        if (!(hasTao && !hasCN && !hasBud)) {
-          rightItems.push(...pickTop(groups.tao, 2));
-        }
+        rightItems.push(...pickTop(groups.tao, 2));
       }
+      // 右侧最多 3 条，避免竖排过长撑破版面
+      while (rightItems.length > 3) rightItems.pop();
 
       function renderBox(box, items) {
         box.innerHTML = '';
@@ -4520,8 +4645,14 @@
         });
       }
       rightBox.classList.remove('sf-align-start','sf-align-end');
-      const hasFestival = groups.cn.length + groups.bud.length + groups.tao.length > 0;
+      const hasFestival = groups.cn.length + groups.bud.length + groups.tao.length + (groups.bday ? groups.bday.length : 0) > 0;
       if (hasFestival) {
+        // 左侧若无节日，补星期几，保持左右平衡
+        if (leftItems.length === 0) {
+          const wd = nowDate ? new Date(nowDate) : new Date();
+          const wk = ['日','一','二','三','四','五','六'];
+          leftItems.push({ src: 'week', catName: '', name: '星期' + wk[wd.getDay()] });
+        }
         renderBox(leftBox, leftItems);
         renderBox(rightBox, rightItems);
       } else {
@@ -6142,6 +6273,30 @@
       return result;
     }
 
+    // 农历转阳历（支持闰月）：lunarToSolar 的闰月增强版
+    // isLeap=true 表示目标日期落在 year 年的闰 month 月
+    function lunarToSolarLeap(year, month, day, isLeap, hour) {
+      if (!lunarInfo[year - 1900]) return null;
+      let days = 0;
+      for (let y = 1900; y < year; y++) days += lunarYearDays(y);
+      const leapM = leapMonth(year);
+      const useLeap = isLeap && leapM === month;   // 该年确有此闰月才按闰月走
+      if (useLeap) {
+        // 闰月在 month 月之后：先加 1..month 全部普通月，再加闰月整月
+        for (let i2 = 1; i2 <= month; i2++) days += monthDays(year, i2);
+        days += leapDays(year);
+      } else {
+        // 普通月：1..month-1 普通月 + (闰月在 month 之前则加闰月) + day-1
+        for (let i2 = 1; i2 < month; i2++) days += monthDays(year, i2);
+        if (leapM > 0 && leapM < month) days += leapDays(year);
+      }
+      days += day - 1;
+      const result = new Date(1900, 0, 31);
+      result.setDate(result.getDate() + days);
+      result.setHours(hour || 12, 0, 0, 0);
+      return result;
+    }
+
     // 八字 → 阳历（按年柱反推年，日柱遍历全年找日期）
     function baziToSolar(yearGz, dayGz, hour) {
       let year = 1984;
@@ -6271,77 +6426,178 @@
         SoundFX.unlock();
         setTimeout(() => {
           closeModal('modalSecret');
-          buildFamilyList();
+          familyYear = new Date().getFullYear();   // 每次进入回到当前年份
+          buildFamilyList(familyYear);
+          updateFamilyYearBtns();
           openModal('modalFamily');
         }, 400);
       }
     }
 
     // ============ 家人生日数据 ============
-    // [关系, 姓名, 阳历年, 月, 日]
+    // 全部为阴历（农历）出生日期：year/month/day 均为农历，直接采用
     const FAMILY_DATA = [
-      ['父亲', '李文山', 1965, 3, 12],
-      ['母亲', '王秀英', 1968, 7, 25],
-      ['兄长', '李志远', 1990, 11, 8],
-      ['姐姐', '李雅芳', 1993, 5, 18],
-      ['本人', '李子墨', 1996, 8, 27],
-      ['妹妹', '李雨桐', 1999, 2, 14],
-      ['姐夫', '陈嘉伟', 1991, 9, 3],
-      ['侄女', '陈思颖', 2020, 12, 15]
+      { relation: '父亲', name: '魏兴凯', year: 1969, month: 3,  day: 3,  type: 'lunar' },   // 农历三月初三
+      { relation: '母亲', name: '胡孝珍', year: 1969, month: 11, day: 23, type: 'lunar' },   // 农历冬月廿三
+      { relation: '姐姐', name: '魏丽霞', year: 1993, month: 9,  day: 22, type: 'lunar' },   // 农历九月廿二
+      { relation: '哥哥', name: '魏国炳', year: 1995, month: 6,  day: 12, type: 'lunar' },   // 农历六月十二
+      { relation: '弟弟', name: '魏国峰', year: 1998, month: 9,  day: 8,  type: 'lunar' },   // 农历九月初八
+      { relation: '侄女', name: '魏程研', year: 2024, month: 4,  day: 20, type: 'lunar' },   // 农历四月二十
+      { relation: '侄女', name: '魏乐研', year: 2025, month: 9,  day: 5,  type: 'lunar' },   // 农历九月初五
+      { relation: '姐夫', name: '魏张宝', year: 1993, month: 7,  day: 15, type: 'lunar' },    // 农历七月十五
+      { relation: '五姨', name: '胡乃珍', missing: true, placeholder: '未录入', remark: '母亲胞妹' },
+      { relation: '五姨父', name: '张进兵', missing: true, placeholder: '未录入' },
+      { relation: '待定', name: '待定', missing: true, placeholder: '待录入', remark: '待定' }
     ];
 
-    function buildFamilyList() {
+    // 预计算每位至亲的农历生日 —— 农历生日（月日）固定不变
+    // 阳历出生 → 经 solarToLunar 转农历；农历出生 → 直接采用
+    // lunarYear 为"真实身份证农历年份"，用于点击头像展示完整真实生辰
+    const FAMILY_LUNAR_BIRTH = FAMILY_DATA.map(item => {
+      let realLunar;
+      if (item.missing) {
+        realLunar = { year: null, month: null, day: null, isLeap: false };
+      } else if (item.type === 'lunar') {
+        realLunar = { year: item.year, month: item.month, day: item.day, isLeap: false };
+      } else {
+        const date = new Date(item.year, item.month - 1, item.day, 12, 0, 0);
+        realLunar = solarToLunar(date);
+      }
+      return {
+        relation: item.relation,
+        name: item.name,
+        lunarYear: realLunar.year,     // 真实农历年份（身份证）
+        lunarMonth: realLunar.month,   // 农历月（固定基准）
+        lunarDay: realLunar.day,       // 农历日（固定基准）
+        isLeap: !!realLunar.isLeap,
+        missing: !!item.missing,                // 未录入标记
+        placeholder: item.placeholder || '未录入',  // 占位文案
+        remark: item.remark || ''      // 备注（可选）
+      };
+    });
+
+    // 家人生日年份切换：±50年
+    let familyYear = new Date().getFullYear();
+    const FAMILY_MIN_YEAR = familyYear - 50;
+    const FAMILY_MAX_YEAR = familyYear + 50;
+
+    function updateFamilyYearBtns() {
+      document.getElementById('fmPrev').disabled = familyYear <= FAMILY_MIN_YEAR;
+      document.getElementById('fmNext').disabled = familyYear >= FAMILY_MAX_YEAR;
+    }
+
+    function buildFamilyList(targetYear) {
       const list = document.getElementById('familyList');
       list.innerHTML = '';
       const now = new Date();
       now.setHours(0, 0, 0, 0);
       const thisYear = now.getFullYear();
+      const displayYear = targetYear || thisYear;
+      document.getElementById('fmYear').textContent = displayYear + '年';
 
-      FAMILY_DATA.forEach(([relation, name, y, m, d]) => {
-        const date = new Date(y, m - 1, d, 12, 0, 0);
-        const lunar = solarToLunar(date);
-        const leapPrefix = lunar.isLeap ? '闰' : '';
-        const lunarStr = yearToChinese(lunar.year) + '年' +
-          leapPrefix + LUNAR_MONTH_PREFIX[lunar.month - 1] + '月' +
-          dayToChinese(lunar.day) + '日';
+      FAMILY_LUNAR_BIRTH.forEach(mem => {
+        // 未录入：占位显示，不参与农历/阳历计算
+        if (mem.missing) {
+          const ph = mem.placeholder;
+          const missItem = document.createElement('div');
+          missItem.className = 'family-item is-past';
+          missItem.innerHTML =
+            `<div class="fi-relation" data-toggle="real" title="点击查看真实生辰">${mem.relation}</div>` +
+            `<span class="fi-name">${mem.name}${mem.remark ? `（${mem.remark}）` : ''}</span>` +
+            `<span class="fi-cd">待录入</span>` +
+            `<div class="fi-solar">阳历 ${ph}</div>` +
+            `<div class="fi-lunar">农历 ${ph}</div>` +
+            `<div class="fi-real">真实生辰 · 农历 ${ph}</div>`;
+          list.appendChild(missItem);
+          return;
+        }
+        const lm = mem.lunarMonth, ld = mem.lunarDay;
+        // 农历生日（月日）固定不变 → 不同年份对应的阳历不同（用农历转阳历）
+        // 当月无三十日时取该月最大日，避免越界
+        const realDay = Math.min(ld, monthDays(displayYear, lm));
+        const solarDate = lunarToSolarLeap(displayYear, lm, realDay, mem.isLeap, 12);
+        if (!solarDate) return;
+
+        // 农历显示：年份随切换变；月日（固定）+ 闰月前缀不变
+        const leapPrefix = mem.isLeap ? '闰' : '';
+        const lunarStr = yearToChinese(displayYear) + '年' +
+          leapPrefix + LUNAR_MONTH_PREFIX[lm - 1] + '月' +
+          dayToChinese(realDay) + '日';
+
+        // 真实生辰：出生当年的完整农历（身份证日期，固定不变，点击头像展示）
+        const realLunarStr = yearToChinese(mem.lunarYear) + '年' +
+          leapPrefix + LUNAR_MONTH_PREFIX[lm - 1] + '月' +
+          dayToChinese(mem.lunarDay) + '日';
+
         const pad = n => String(n).padStart(2, '0');
-        const solarStr = `${y}年${pad(m)}月${pad(d)}日`;
+        const solarStr = `${solarDate.getFullYear()}年${pad(solarDate.getMonth() + 1)}月${pad(solarDate.getDate())}日`;
 
-        // 倒计时：按今年阳历生日
-        const thisYearBirthday = new Date(thisYear, m - 1, d);
-        thisYearBirthday.setHours(0, 0, 0, 0);
+        // 倒计时：按显示年份的阳历生日计算
+        const birthday = new Date(solarDate);
+        birthday.setHours(0, 0, 0, 0);
         let cdText, cdClass = '';
-        if (thisYearBirthday < now) {
-          cdText = '已过生日';
+        if (displayYear < thisYear) {
+          cdText = `${displayYear}年已过`;
           cdClass = 'is-past';
+        } else if (displayYear > thisYear) {
+          const diffDays = Math.round((birthday - now) / (1000 * 60 * 60 * 24));
+          cdText = `距${displayYear}年生日：${diffDays}天`;
         } else {
-          const diffDays = Math.round((thisYearBirthday - now) / (1000 * 60 * 60 * 24));
-          if (diffDays === 0) {
-            cdText = '今日生日';
-            cdClass = 'is-today';
-          } else if (diffDays <= 7) {
-            cdText = `距下次生日：${diffDays}天`;
-            cdClass = 'is-soon';
+          if (birthday < now) {
+            cdText = '已过生日';
+            cdClass = 'is-past';
           } else {
-            cdText = `距下次生日：${diffDays}天`;
+            const diffDays = Math.round((birthday - now) / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) {
+              cdText = '今日生日';
+              cdClass = 'is-today';
+            } else if (diffDays <= 7) {
+              cdText = `距下次生日：${diffDays}天`;
+              cdClass = 'is-soon';
+            } else {
+              cdText = `距下次生日：${diffDays}天`;
+            }
           }
         }
 
         const item = document.createElement('div');
-        item.className = 'family-item';
+        item.className = 'family-item ' + cdClass;
         item.innerHTML =
-          `<div class="fi-relation">${relation}</div>` +
-          `<div class="fi-info">` +
-            `<div class="fi-name-row ${cdClass}">` +
-              `<span class="fi-name">${name}</span>` +
-              `<span class="fi-cd">　${cdText}</span>` +
-            `</div>` +
-            `<div class="fi-lunar">（阳历）${solarStr}</div>` +
-            `<div class="fi-lunar">（农历）${lunarStr}</div>` +
-          `</div>`;
+          `<div class="fi-relation" data-toggle="real" title="点击查看真实生辰">${mem.relation}</div>` +
+          `<span class="fi-name">${mem.name}${mem.remark ? `（${mem.remark}）` : ''}</span>` +
+          `<span class="fi-cd">${cdText}</span>` +
+          `<div class="fi-solar">阳历 ${solarStr}</div>` +
+          `<div class="fi-lunar">农历 ${lunarStr}</div>` +
+          `<div class="fi-real">真实生辰 · 农历 ${realLunarStr}</div>`;
         list.appendChild(item);
       });
     }
+
+    // 上一年 / 下一年 切换事件
+    document.getElementById('fmPrev').addEventListener('click', () => {
+      if (familyYear <= FAMILY_MIN_YEAR) { SoundFX.error(); return; }
+      SoundFX.year();
+      familyYear--;
+      buildFamilyList(familyYear);
+      updateFamilyYearBtns();
+    });
+    document.getElementById('fmNext').addEventListener('click', () => {
+      if (familyYear >= FAMILY_MAX_YEAR) { SoundFX.error(); return; }
+      SoundFX.year();
+      familyYear++;
+      buildFamilyList(familyYear);
+      updateFamilyYearBtns();
+    });
+
+    // 点击头像：切换显示"真实生辰"（身份证农历），头像发光
+    // 事件委托在 familyList 上，年份切换重建卡片后仍生效
+    document.getElementById('familyList').addEventListener('click', (e) => {
+      const head = e.target.closest('[data-toggle="real"]');
+      if (!head) return;
+      SoundFX.confirm();
+      const card = head.closest('.family-item');
+      card.classList.toggle('show-real');
+    });
   </script>
 
 
